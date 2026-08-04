@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   description: "Discover, explore, and save your favorite movies in style.",
 };
 
+// Prefer a project-provided icon in /public. Falls back to Next's default otherwise.
+export const icons = {
+  icon: "/file.svg",
+};
+
 import Navbar from "@/components/Navbar";
 
 export default function RootLayout({

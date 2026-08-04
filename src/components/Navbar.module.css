@@ -138,3 +138,31 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .navLinks {
+    gap: 1rem;
+  }
+  
+  /* Hide text links on mobile to save space */
+  .link {
+    display: none;
+  }
+
+  /* Shrink search bar on tablets/large phones */
+  .searchContainer {
+    width: 200px;
+  }
+  
+  .logo {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Shrink search bar further on small phones */
+  .searchContainer {
+    width: 150px;
+  }
+}
