@@ -2,6 +2,7 @@ import { getMovieDetails } from "@/lib/tmdb";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import MoviePlayer from "@/components/MoviePlayer";
 
 export default async function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -129,14 +130,7 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
       {/* Player Section */}
       <section id="player" className="container" style={{ padding: "0 2rem 4rem", maxWidth: "1000px", margin: "0 auto" }}>
         <h2 className="heading-md" style={{ marginBottom: "1.5rem" }}>Watch Now</h2>
-        <div style={{ position: "relative", width: "100%", paddingBottom: "56.25%", background: "#000", borderRadius: "var(--radius-md)", overflow: "hidden", boxShadow: "var(--card-shadow)" }}>
-          <iframe 
-            src={`https://vidsrc.me/embed/movie?tmdb=${movie.id}`}
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
-            allowFullScreen
-            title="Movie Player"
-          />
-        </div>
+        <MoviePlayer movieId={movie.id} />
       </section>
     </div>
   );
