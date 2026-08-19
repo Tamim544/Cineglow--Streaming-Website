@@ -16,16 +16,16 @@ const servers = [
     url: (id: number) => `https://vidsrc.to/embed/movie/${id}`,
   },
   {
-    name: "Server 3 (SuperEmbed)",
-    url: (id: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    name: "Server 3 (VidSrc.cc)",
+    url: (id: number) => `https://vidsrc.cc/v2/embed/movie/${id}`,
   },
   {
-    name: "Server 4 (AutoEmbed)",
-    url: (id: number) => `https://autoembed.to/movie/tmdb/${id}`,
+    name: "Server 4 (VidSrc.pro)",
+    url: (id: number) => `https://vidsrc.pro/embed/movie/${id}`,
   },
   {
-    name: "Server 5 (2Embed)",
-    url: (id: number) => `https://www.2embed.cc/embed/${id}`,
+    name: "Server 5 (Embed.su)",
+    url: (id: number) => `https://embed.su/embed/movie/${id}`,
   }
 ];
 
