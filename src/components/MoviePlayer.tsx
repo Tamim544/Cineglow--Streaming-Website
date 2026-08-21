@@ -56,7 +56,7 @@ export default function MoviePlayer({ movieId }: MoviePlayerProps) {
         ))}
       </div>
       
-      <div style={{ position: "relative", width: "100%", paddingBottom: "56.25%", background: "#000", borderRadius: "var(--radius-md)", overflow: "hidden", boxShadow: "var(--card-shadow)" }}>
+      <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: "#000", borderRadius: "var(--radius-md)", overflow: "hidden", boxShadow: "var(--card-shadow)" }}>
         <iframe 
           src={servers[activeServer].url(movieId)}
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
