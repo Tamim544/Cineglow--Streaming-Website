@@ -86,3 +86,15 @@
   z-index: 3;
 }
 
+@media (hover: none) or (max-width: 768px) {
+  .overlay {
+    transform: translateY(0);
+    opacity: 1;
+    padding: 1.5rem 0.75rem 0.75rem;
+  }
+
+  .title {
+    font-size: 0.95rem;
+  }
+}
+

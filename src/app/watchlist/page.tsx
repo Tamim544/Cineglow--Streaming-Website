@@ -172,13 +172,7 @@ export default function WatchlistPage() {
 
         {/* Watchlist Content */}
         {watchlist.length > 0 ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "2rem",
-            }}
-          >
+          <div className="media-grid">
             {watchlist.map((item) => (
               <MovieCard
                 key={`${item.mediaType}-${item.id}`}

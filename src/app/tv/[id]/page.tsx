@@ -213,7 +213,7 @@ export default async function TVDetailPage({
       </section>
 
       {/* Overview */}
-      <section className="container" style={{ padding: "2rem 2rem 3rem", maxWidth: "1100px", margin: "0 auto" }}>
+      <section className="container" style={{ padding: "2rem 1rem 2.5rem", maxWidth: "1100px", margin: "0 auto" }}>
         <h2 className="heading-md" style={{ marginBottom: "0.75rem" }}>Synopsis</h2>
         <p style={{ fontSize: "1.05rem", lineHeight: "1.8", color: "var(--text-secondary)" }}>
           {show.overview || "No synopsis available."}
@@ -221,7 +221,7 @@ export default async function TVDetailPage({
       </section>
 
       {/* Video Player Section */}
-      <section id="player" className="container" style={{ padding: "0 2rem 4rem", maxWidth: "1100px", margin: "0 auto" }}>
+      <section id="player" className="container" style={{ padding: "0 1rem 3.5rem", maxWidth: "1100px", margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <h2 className="heading-md">Now Watching</h2>
@@ -244,7 +244,7 @@ export default async function TVDetailPage({
       </section>
 
       {/* Seasons & Episodes Selector */}
-      <section className="container" style={{ padding: "0 2rem 6rem", maxWidth: "1100px", margin: "0 auto" }}>
+      <section className="container" style={{ padding: "0 1rem 5rem", maxWidth: "1100px", margin: "0 auto" }}>
         <div
           style={{
             display: "flex",
@@ -260,7 +260,7 @@ export default async function TVDetailPage({
           <h2 className="heading-md">Episodes</h2>
 
           {/* Season Selector */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
             <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Season:</span>
             <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
               {validSeasons.map((s: any) => (
@@ -285,8 +285,8 @@ export default async function TVDetailPage({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: "1.5rem",
+            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+            gap: "1rem",
           }}
         >
           {episodes.map((ep: any) => {

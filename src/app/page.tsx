@@ -60,11 +60,7 @@ export default async function Home() {
           <Link href="/trending" className="btn btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.9rem" }}>View All</Link>
         </div>
         
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-          gap: "2rem" 
-        }}>
+        <div className="media-grid">
           {trendingMovies.slice(0, 10).map((movie: any) => (
             <MovieCard 
               key={movie.id}
@@ -95,11 +91,7 @@ export default async function Home() {
             </Link>
           </div>
           
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-            gap: "2rem" 
-          }}>
+          <div className="media-grid">
             {koreanDramas.slice(0, 10).map((drama: any) => (
               <MovieCard 
                 key={drama.id}
@@ -133,11 +125,7 @@ export default async function Home() {
             </Link>
           </div>
           
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-            gap: "2rem" 
-          }}>
+          <div className="media-grid">
             {animeList.slice(0, 10).map((anime: any) => (
               <MovieCard 
                 key={anime.id}
@@ -161,11 +149,7 @@ export default async function Home() {
           <h2 className="heading-md">Popular Movies</h2>
         </div>
         
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-          gap: "2rem" 
-        }}>
+        <div className="media-grid">
           {popularMovies.slice(0, 10).map((movie: any) => (
             <MovieCard 
               key={movie.id}
@@ -184,11 +168,7 @@ export default async function Home() {
           <h2 className="heading-md">Top Rated Classics</h2>
         </div>
         
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-          gap: "2rem" 
-        }}>
+        <div className="media-grid">
           {topRatedMovies.slice(0, 10).map((movie: any) => (
             <MovieCard 
               key={movie.id}
@@ -207,11 +187,7 @@ export default async function Home() {
           <h2 className="heading-md">Coming Soon</h2>
         </div>
         
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-          gap: "2rem" 
-        }}>
+        <div className="media-grid">
           {upcomingMovies.slice(0, 10).map((movie: any) => (
             <MovieCard 
               key={movie.id}

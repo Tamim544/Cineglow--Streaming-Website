@@ -87,6 +87,20 @@ button {
   box-shadow: var(--glow-shadow);
 }
 
+/* Responsive Media Grid Utility */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 0.85rem !important;
+  }
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
@@ -94,17 +108,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .heading-xl {
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(1.75rem, 4.5vw, 4.2rem);
   letter-spacing: -0.02em;
 }
 
 .heading-lg {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
   letter-spacing: -0.01em;
 }
 
 .heading-md {
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: clamp(1.15rem, 2.5vw, 1.85rem);
 }
 
 .text-gradient {

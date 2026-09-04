@@ -110,13 +110,7 @@ export default async function AnimePage({
 
         {/* Anime Grid */}
         {items.length > 0 ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "2rem",
-            }}
-          >
+          <div className="media-grid">
             {items.map((anime: any) => (
               <MovieCard
                 key={anime.id}

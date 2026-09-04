@@ -78,13 +78,7 @@ export default async function KDramasPage({
 
         {/* Drama Grid */}
         {kdramas.length > 0 ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "2rem",
-            }}
-          >
+          <div className="media-grid">
             {kdramas.map((drama: any) => (
               <MovieCard
                 key={drama.id}

@@ -64,3 +64,31 @@
   gap: 1rem;
   justify-content: center;
 }
+
+@media (max-width: 768px) {
+  .hero {
+    height: auto;
+    min-height: 500px;
+    padding-top: 100px;
+    padding-bottom: 3rem;
+  }
+
+  .content {
+    padding: 0 1.25rem;
+  }
+
+  .description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}

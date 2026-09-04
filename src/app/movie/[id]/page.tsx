@@ -95,7 +95,7 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
               <span>{movie.genres?.map((g: any) => g.name).join(", ")}</span>
             </div>
             
-            <div style={{ display: "flex", gap: "1rem" }}>
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
               <a href="#player" className="btn btn-primary" style={{ 
                 background: "var(--accent)", 
                 color: "#fff", 
@@ -125,16 +125,16 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
       </section>
 
       {/* Overview & Details */}
-      <section className="container" style={{ padding: "4rem 2rem", maxWidth: "1000px", margin: "0 auto" }}>
+      <section className="container" style={{ padding: "2.5rem 1rem", maxWidth: "1000px", margin: "0 auto" }}>
         <h2 className="heading-md" style={{ marginBottom: "1rem" }}>Overview</h2>
-        <p style={{ fontSize: "1.1rem", lineHeight: "1.8", color: "var(--text-secondary)", marginBottom: "3rem" }}>
+        <p style={{ fontSize: "1.05rem", lineHeight: "1.8", color: "var(--text-secondary)", marginBottom: "2rem" }}>
           {movie.overview}
         </p>
       </section>
 
       {/* Player Section */}
-      <section id="player" className="container" style={{ padding: "0 2rem 4rem", maxWidth: "1000px", margin: "0 auto" }}>
-        <h2 className="heading-md" style={{ marginBottom: "1.5rem" }}>Watch Now</h2>
+      <section id="player" className="container" style={{ padding: "0 1rem 4rem", maxWidth: "1000px", margin: "0 auto" }}>
+        <h2 className="heading-md" style={{ marginBottom: "1.25rem" }}>Watch Now</h2>
         <MoviePlayer movieId={movie.id} />
       </section>
     </div>

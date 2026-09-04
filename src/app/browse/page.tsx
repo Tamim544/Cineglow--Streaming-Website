@@ -72,11 +72,7 @@ export default async function BrowsePage({
         </div>
         
         {movies.length > 0 ? (
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-            gap: "2rem" 
-          }}>
+          <div className="media-grid">
             {movies.map((movie: any) => {
               const isTV = movie.media_type === "tv";
               const isKorean = movie.original_language === "ko";

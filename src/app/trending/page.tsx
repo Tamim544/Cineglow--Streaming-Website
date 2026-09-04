@@ -19,11 +19,7 @@ export default async function TrendingPage() {
           <span className="text-gradient">Trending Now</span>
         </h1>
         
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-          gap: "2rem" 
-        }}>
+        <div className="media-grid">
           {trendingMovies.map((movie: any) => (
             <MovieCard 
               key={movie.id}

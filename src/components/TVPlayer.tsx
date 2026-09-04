@@ -181,6 +181,8 @@ export default function TVPlayer({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "0.75rem",
           background: "rgba(255, 255, 255, 0.05)",
           padding: "0.75rem 1rem",
           borderRadius: "var(--radius-sm)",
