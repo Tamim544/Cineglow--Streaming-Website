@@ -116,7 +116,6 @@ export default function MoviePlayer({ movieId }: MoviePlayerProps) {
           src={servers[activeServer].url(movieId)}
           style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
           allowFullScreen
-          allow="autoplay; fullscreen; picture-in-picture"
           title="Movie Player"
         />
       </div>

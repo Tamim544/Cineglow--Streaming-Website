@@ -169,7 +169,6 @@ export default function TVPlayer({
             border: 0,
           }}
           allowFullScreen
-          allow="autoplay; fullscreen; picture-in-picture"
           title={`Playing Season ${season} Episode ${episode}`}
         />
       </div>
