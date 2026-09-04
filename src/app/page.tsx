@@ -1,7 +1,7 @@
 import HeroCarousel from "@/components/HeroCarousel";
 import MovieCard from "@/components/MovieCard";
 import Link from "next/link";
-import { getTrendingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, getKoreanDramas } from "@/lib/tmdb";
+import { getTrendingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, getKoreanDramas, getAnime } from "@/lib/tmdb";
 
 // Fallback mock data if API key is not yet provided
 const MOCK_MOVIES = [
@@ -21,14 +21,16 @@ export default async function Home() {
   let topRatedMovies = [];
   let upcomingMovies = [];
   let koreanDramas = [];
+  let animeList = [];
 
   try {
-    const [trendingData, popularData, topRatedData, upcomingData, kdramaData] = await Promise.all([
+    const [trendingData, popularData, topRatedData, upcomingData, kdramaData, animeData] = await Promise.all([
       getTrendingMovies(1),
       getPopularMovies(1),
       getTopRatedMovies(1),
       getUpcomingMovies(1),
       getKoreanDramas(1),
+      getAnime(1),
     ]);
     
     trendingMovies = trendingData.results;
@@ -36,6 +38,7 @@ export default async function Home() {
     topRatedMovies = topRatedData.results;
     upcomingMovies = upcomingData.results;
     koreanDramas = kdramaData.results;
+    animeList = animeData.results;
   } catch (error) {
     console.warn("Using mock data because TMDB fetch failed (API key missing?)");
     trendingMovies = MOCK_MOVIES;
@@ -43,6 +46,7 @@ export default async function Home() {
     topRatedMovies = MOCK_MOVIES;
     upcomingMovies = MOCK_MOVIES;
     koreanDramas = [];
+    animeList = [];
   }
 
   return (
@@ -111,6 +115,45 @@ export default async function Home() {
           </div>
         </div>
       )}
+
+      {/* Top Anime Spotlight */}
+      {animeList.length > 0 && (
+        <div className="container" style={{ marginBottom: "4rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+            <div>
+              <div style={{ display: "inline-block", padding: "2px 8px", borderRadius: "var(--radius-sm)", background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#f87171", fontSize: "0.75rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase" }}>
+                Top Rated Anime
+              </div>
+              <h2 className="heading-md">
+                Trending <span style={{ background: "linear-gradient(135deg, #f87171, #fb923c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Anime Series</span>
+              </h2>
+            </div>
+            <Link href="/anime" className="btn btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.9rem" }}>
+              Explore All Anime →
+            </Link>
+          </div>
+          
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+            gap: "2rem" 
+          }}>
+            {animeList.slice(0, 10).map((anime: any) => (
+              <MovieCard 
+                key={anime.id}
+                id={anime.id}
+                title={anime.name || anime.title}
+                posterPath={anime.poster_path}
+                rating={anime.vote_average || 8.0}
+                year={anime.first_air_date ? anime.first_air_date.split('-')[0] : "N/A"}
+                mediaType="tv"
+                badge="ANIME"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
 
 
       <div className="container" style={{ marginBottom: "4rem" }}>

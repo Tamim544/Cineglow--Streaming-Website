@@ -96,6 +96,10 @@ export default function Navbar() {
         <div className={styles.navLinks}>
           <Link href="/" className={styles.link}>Home</Link>
           <Link href="/browse" className={styles.link}>Movies</Link>
+          <Link href="/anime" className={styles.link} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <span>Anime</span>
+            <span style={{ fontSize: "0.65rem", background: "linear-gradient(135deg, #f87171, #fb923c)", padding: "1px 5px", borderRadius: "4px", color: "#fff", fontWeight: 700 }}>HOT</span>
+          </Link>
           <Link href="/kdramas" className={styles.link} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <span>K-Dramas</span>
             <span style={{ fontSize: "0.65rem", background: "linear-gradient(135deg, #ec4899, #8b5cf6)", padding: "1px 5px", borderRadius: "4px", color: "#fff", fontWeight: 700 }}>NEW</span>
@@ -122,7 +126,8 @@ export default function Navbar() {
               </svg>
               <input 
                 type="text" 
-                placeholder="Search movies, K-Dramas..." 
+                placeholder="Search movies, anime, K-Dramas..." 
+
                 className={`input-base ${styles.searchInput}`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
