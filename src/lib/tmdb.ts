@@ -133,3 +133,38 @@ export const searchMulti = async (query: string, page = 1) => {
   }
 };
 
+export const getAnime = async (page = 1) => {
+  try {
+    const response = await tmdbClient.get(`/discover/tv`, {
+      params: {
+        page,
+        with_genres: '16', // Animation
+        with_original_language: 'ja',
+        sort_by: 'popularity.desc',
+        include_adult: false,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAnimeMovies = async (page = 1) => {
+  try {
+    const response = await tmdbClient.get(`/discover/movie`, {
+      params: {
+        page,
+        with_genres: '16', // Animation
+        with_original_language: 'ja',
+        sort_by: 'popularity.desc',
+        include_adult: false,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
