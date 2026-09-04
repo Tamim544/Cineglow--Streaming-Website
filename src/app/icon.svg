@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="50%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur1" />
+      <feGaussianBlur stdDeviation="24" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background with dark rounded rect -->
+  <rect width="512" height="512" rx="128" fill="#0b0b12" />
+  <rect width="500" height="500" x="6" y="6" rx="124" fill="none" stroke="url(#glowGrad)" stroke-width="4" stroke-opacity="0.4" />
+  
+  <!-- Outer glowing film reel 'C' shape -->
+  <path d="M 360,160 A 150,150 0 1,0 360,352" 
+        fill="none" 
+        stroke="url(#glowGrad)" 
+        stroke-width="36" 
+        stroke-linecap="round" 
+        filter="url(#neonGlow)" />
+
+  <!-- Play triangle in center -->
+  <polygon points="230,190 340,256 230,322" 
+           fill="url(#glowGrad)" 
+           filter="url(#neonGlow)" />
+           
+  <!-- Inner reel perforations -->
+  <circle cx="180" cy="200" r="14" fill="#ffffff" opacity="0.8" />
+  <circle cx="150" cy="256" r="14" fill="#ffffff" opacity="0.8" />
+  <circle cx="180" cy="312" r="14" fill="#ffffff" opacity="0.8" />
+</svg>
