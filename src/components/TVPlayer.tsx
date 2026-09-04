@@ -13,24 +13,24 @@ interface TVPlayerProps {
 
 const servers = [
   {
-    name: "Server 1 (VidSrc.me)",
+    name: "Server 1 (AutoEmbed)",
+    url: (id: number, s: number, e: number) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
+  },
+  {
+    name: "Server 2 (VidSrc.pm)",
+    url: (id: number, s: number, e: number) => `https://vidsrc.pm/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+  },
+  {
+    name: "Server 3 (2Embed)",
+    url: (id: number, s: number, e: number) => `https://2embed.skin/embedtv/${id}&s=${s}&e=${e}`,
+  },
+  {
+    name: "Server 4 (VidSrc.me)",
     url: (id: number, s: number, e: number) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
-    name: "Server 2 (VidSrc.to)",
+    name: "Server 5 (VidSrc.to)",
     url: (id: number, s: number, e: number) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    name: "Server 3 (VidSrc.cc)",
-    url: (id: number, s: number, e: number) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    name: "Server 4 (VidSrc.pro)",
-    url: (id: number, s: number, e: number) => `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    name: "Server 5 (Embed.su)",
-    url: (id: number, s: number, e: number) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
   },
 ];
 

@@ -8,25 +8,25 @@ interface MoviePlayerProps {
 
 const servers = [
   {
-    name: "Server 1 (VidSrc.me)",
+    name: "Server 1 (AutoEmbed)",
+    url: (id: number) => `https://autoembed.co/movie/tmdb/${id}`,
+  },
+  {
+    name: "Server 2 (VidSrc.pm)",
+    url: (id: number) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
+  },
+  {
+    name: "Server 3 (2Embed)",
+    url: (id: number) => `https://2embed.skin/embed/${id}`,
+  },
+  {
+    name: "Server 4 (VidSrc.me)",
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 2 (VidSrc.to)",
+    name: "Server 5 (VidSrc.to)",
     url: (id: number) => `https://vidsrc.to/embed/movie/${id}`,
   },
-  {
-    name: "Server 3 (VidSrc.cc)",
-    url: (id: number) => `https://vidsrc.cc/v2/embed/movie/${id}`,
-  },
-  {
-    name: "Server 4 (VidSrc.pro)",
-    url: (id: number) => `https://vidsrc.pro/embed/movie/${id}`,
-  },
-  {
-    name: "Server 5 (Embed.su)",
-    url: (id: number) => `https://embed.su/embed/movie/${id}`,
-  }
 ];
 
 export default function MoviePlayer({ movieId }: MoviePlayerProps) {
