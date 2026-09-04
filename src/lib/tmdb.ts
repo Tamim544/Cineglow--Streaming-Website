@@ -67,3 +67,69 @@ export const getMovieDetails = async (id: string) => {
     throw error;
   }
 };
+
+export const getTrendingTV = async (page = 1) => {
+  try {
+    const response = await tmdbClient.get(`/trending/tv/day`, { params: { page } });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPopularTV = async (page = 1) => {
+  try {
+    const response = await tmdbClient.get(`/tv/popular`, { params: { page } });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getKoreanDramas = async (page = 1) => {
+  try {
+    const response = await tmdbClient.get(`/discover/tv`, {
+      params: {
+        page,
+        with_original_language: 'ko',
+        sort_by: 'popularity.desc',
+        include_adult: false,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTVDetails = async (id: string) => {
+  try {
+    const response = await tmdbClient.get(`/tv/${id}`, {
+      params: { append_to_response: 'videos,credits' },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTVSeason = async (id: string, seasonNumber: number) => {
+  try {
+    const response = await tmdbClient.get(`/tv/${id}/season/${seasonNumber}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const searchMulti = async (query: string, page = 1) => {
+  try {
+    const response = await tmdbClient.get(`/search/multi`, {
+      params: { query, page, include_adult: false },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+

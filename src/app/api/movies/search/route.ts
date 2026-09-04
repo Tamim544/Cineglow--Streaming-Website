@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchMovies } from '@/lib/tmdb';
+import { searchMulti } from '@/lib/tmdb';
 
 export async function GET(request: Request) {
   try {
@@ -10,12 +10,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ results: [] });
     }
 
-    const data = await searchMovies(query, 1);
-    return NextResponse.json(data);
+    const data = await searchMulti(query, 1);
+    const filteredResults = (data.results || []).filter(
+      (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+    );
+
+    return NextResponse.json({ ...data, results: filteredResults });
   } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to search movies' },
+      { error: 'Failed to search media' },
       { status: 500 }
     );
   }
 }
+
