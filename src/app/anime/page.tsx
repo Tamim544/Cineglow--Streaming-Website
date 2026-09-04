@@ -10,6 +10,7 @@ export default async function AnimePage({
   const resolvedParams = await searchParams;
   const pageParam = typeof resolvedParams.page === "string" ? resolvedParams.page : "1";
   const typeParam = typeof resolvedParams.type === "string" ? resolvedParams.type : "series";
+  const filterParam = typeof resolvedParams.filter === "string" ? resolvedParams.filter : "popular";
   const currentPage = parseInt(pageParam, 10) || 1;
 
   const isMovies = typeParam === "movies";
@@ -18,7 +19,7 @@ export default async function AnimePage({
   let totalPages = 1;
 
   try {
-    const data = isMovies ? await getAnimeMovies(currentPage) : await getAnime(currentPage);
+    const data = isMovies ? await getAnimeMovies(currentPage, filterParam) : await getAnime(currentPage, filterParam);
     items = data.results || [];
     totalPages = Math.min(data.total_pages || 1, 500);
   } catch (error) {
@@ -28,14 +29,21 @@ export default async function AnimePage({
   const hasNextPage = currentPage < totalPages;
   const hasPrevPage = currentPage > 1;
 
-  const buildPageUrl = (page: number, type: string) => `/anime?page=${page}&type=${type}`;
+  const buildPageUrl = (page: number, type: string = typeParam, filter: string = filterParam) =>
+    `/anime?page=${page}&type=${type}&filter=${filter}`;
+
+  const filters = [
+    { id: "popular", label: "🔥 Most Popular" },
+    { id: "top_rated", label: "⭐ Top Rated" },
+    { id: "new", label: "✨ New Releases" },
+  ];
 
   return (
     <div style={{ paddingTop: "80px", minHeight: "80vh" }}>
       <div className="container" style={{ marginTop: "3rem", marginBottom: "4rem" }}>
         
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2.5rem", flexWrap: "wrap", gap: "1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2rem", flexWrap: "wrap", gap: "1.5rem" }}>
           <div>
             <div style={{ display: "inline-block", padding: "4px 12px", borderRadius: "var(--radius-sm)", background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#f87171", fontSize: "0.8rem", fontWeight: 700, marginBottom: "0.75rem", textTransform: "uppercase", letterSpacing: "1px" }}>
               アニメ • Japanese Animation
@@ -51,7 +59,7 @@ export default async function AnimePage({
           {/* Series vs Movies Filter Tabs */}
           <div style={{ display: "flex", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "4px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <Link
-              href={buildPageUrl(1, "series")}
+              href={buildPageUrl(1, "series", filterParam)}
               className={`btn ${!isMovies ? "btn-primary" : "btn-secondary"}`}
               style={{
                 padding: "0.5rem 1.25rem",
@@ -63,7 +71,7 @@ export default async function AnimePage({
               Anime Series
             </Link>
             <Link
-              href={buildPageUrl(1, "movies")}
+              href={buildPageUrl(1, "movies", filterParam)}
               className={`btn ${isMovies ? "btn-primary" : "btn-secondary"}`}
               style={{
                 padding: "0.5rem 1.25rem",
@@ -75,6 +83,29 @@ export default async function AnimePage({
               Anime Movies
             </Link>
           </div>
+        </div>
+
+        {/* Sort Filter Pills */}
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "2.5rem", flexWrap: "wrap" }}>
+          {filters.map((f) => {
+            const active = filterParam === f.id;
+            return (
+              <Link
+                key={f.id}
+                href={buildPageUrl(1, typeParam, f.id)}
+                className={`btn ${active ? "btn-primary" : "btn-secondary"}`}
+                style={{
+                  padding: "0.45rem 1rem",
+                  fontSize: "0.85rem",
+                  border: active ? "none" : "1px solid rgba(255,255,255,0.1)",
+                  background: active ? "linear-gradient(135deg, #f87171, #fb923c)" : "rgba(255,255,255,0.05)",
+                  color: "#fff",
+                }}
+              >
+                {f.label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Anime Grid */}
@@ -102,7 +133,7 @@ export default async function AnimePage({
         ) : (
           <div style={{ textAlign: "center", padding: "4rem 0", color: "var(--text-secondary)" }}>
             <h2 className="heading-md" style={{ marginBottom: "1rem" }}>No anime titles found</h2>
-            <p>Please try a different page or check back shortly.</p>
+            <p>Please try a different page or filter.</p>
           </div>
         )}
 
@@ -110,7 +141,7 @@ export default async function AnimePage({
         {totalPages > 1 && (
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "4rem" }}>
             {hasPrevPage ? (
-              <Link href={buildPageUrl(currentPage - 1, typeParam)} className="btn btn-secondary">
+              <Link href={buildPageUrl(currentPage - 1, typeParam, filterParam)} className="btn btn-secondary">
                 ← Previous
               </Link>
             ) : (
@@ -133,7 +164,7 @@ export default async function AnimePage({
             </div>
 
             {hasNextPage ? (
-              <Link href={buildPageUrl(currentPage + 1, typeParam)} className="btn btn-primary">
+              <Link href={buildPageUrl(currentPage + 1, typeParam, filterParam)} className="btn btn-primary">
                 Next →
               </Link>
             ) : (
