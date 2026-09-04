@@ -61,3 +61,28 @@
   gap: 4px;
   color: #fbbf24; /* Gold */
 }
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(99, 102, 241, 0.9);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.watchlistBtnWrapper {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+}
+
