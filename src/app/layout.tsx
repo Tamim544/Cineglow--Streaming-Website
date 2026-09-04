@@ -8,14 +8,17 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "CineGlow | Premium Movie Experience",
-  description: "Discover, explore, and save your favorite movies in style.",
+  title: "CineGlow | Premium Movie & Series Experience",
+  description: "Discover, stream, and save your favorite movies and Korean dramas in style.",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
-// Prefer a project-provided icon in /public. Falls back to Next's default otherwise.
-export const icons = {
-  icon: "/file.svg",
-};
 
 import Navbar from "@/components/Navbar";
 

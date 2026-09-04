@@ -87,9 +87,11 @@ export default function Navbar() {
   return (
     <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
       <div className={`container ${styles.navContainer}`}>
-        <Link href="/" className={styles.logo}>
-          <span className="text-accent-gradient">Cine</span>Glow
+        <Link href="/" className={styles.logo} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Image src="/icon.png" alt="CineGlow Logo" width={32} height={32} style={{ borderRadius: "8px", boxShadow: "0 0 10px rgba(236, 72, 153, 0.4)" }} />
+          <span><span className="text-accent-gradient">Cine</span>Glow</span>
         </Link>
+
         
         <div className={styles.navLinks}>
           <Link href="/" className={styles.link}>Home</Link>
