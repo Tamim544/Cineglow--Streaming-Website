@@ -44,6 +44,7 @@ export default function TVPlayer({
 }: TVPlayerProps) {
   const [activeServer, setActiveServer] = useState(0);
   const [cinemaMode, setCinemaMode] = useState(false);
+  const [adShield, setAdShield] = useState(true);
 
   // Save to "Continue Watching" history in localStorage
   useEffect(() => {
@@ -122,26 +123,46 @@ export default function TVPlayer({
           ))}
         </div>
 
-        {/* Cinema Mode Toggle */}
-        <button
-          onClick={() => setCinemaMode(!cinemaMode)}
-          className="btn btn-secondary"
-          style={{
-            padding: "0.4rem 0.8rem",
-            fontSize: "0.85rem",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            background: cinemaMode ? "var(--accent)" : "rgba(255,255,255,0.08)",
-            color: "#fff",
-          }}
-          title="Toggle Cinema Theater Mode"
-        >
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z" clipRule="evenodd" />
-          </svg>
-          {cinemaMode ? "Exit Theater Mode" : "Theater Mode"}
-        </button>
+        {/* Right Tools: Ad Shield & Cinema Mode */}
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <button
+            onClick={() => setAdShield(!adShield)}
+            className="btn btn-secondary"
+            style={{
+              padding: "0.4rem 0.8rem",
+              fontSize: "0.85rem",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              background: adShield ? "rgba(16, 185, 129, 0.2)" : "rgba(255,255,255,0.08)",
+              borderColor: adShield ? "#10b981" : "transparent",
+              color: adShield ? "#34d399" : "var(--text-secondary)",
+            }}
+            title={adShield ? "Ad & Popup Shield is Active (Blocks new tab popups)" : "Click to enable Ad Shield"}
+          >
+            <span>{adShield ? "🛡️ Shield: ON" : "🛡️ Shield: OFF"}</span>
+          </button>
+
+          <button
+            onClick={() => setCinemaMode(!cinemaMode)}
+            className="btn btn-secondary"
+            style={{
+              padding: "0.4rem 0.8rem",
+              fontSize: "0.85rem",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              background: cinemaMode ? "var(--accent)" : "rgba(255,255,255,0.08)",
+              color: "#fff",
+            }}
+            title="Toggle Cinema Theater Mode"
+          >
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2v8h10V6H5z" clipRule="evenodd" />
+            </svg>
+            {cinemaMode ? "Exit Theater" : "Theater"}
+          </button>
+        </div>
       </div>
 
       {/* Video Frame */}
@@ -158,7 +179,7 @@ export default function TVPlayer({
         }}
       >
         <iframe
-          key={`${activeServer}-${season}-${episode}`}
+          key={`${activeServer}-${season}-${episode}-${adShield}`}
           src={servers[activeServer].url(tvId, season, episode)}
           style={{
             position: "absolute",
@@ -169,9 +190,12 @@ export default function TVPlayer({
             border: 0,
           }}
           allowFullScreen
+          allow="autoplay; fullscreen; picture-in-picture"
+          sandbox={adShield ? "allow-forms allow-scripts allow-same-origin allow-presentation" : undefined}
           title={`Playing Season ${season} Episode ${episode}`}
         />
       </div>
+
 
       {/* Episode Navigation Bar */}
       <div
