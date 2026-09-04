@@ -86,13 +86,40 @@ export const getPopularTV = async (page = 1) => {
   }
 };
 
-export const getKoreanDramas = async (page = 1) => {
+const getSortParams = (filter: string, isMovie = false) => {
+  const today = new Date().toISOString().split('T')[0];
+  if (filter === 'top_rated' || filter === 'trending') {
+    return {
+      sort_by: 'vote_average.desc',
+      'vote_count.gte': 50,
+    };
+  }
+  if (filter === 'new') {
+    return isMovie
+      ? {
+          sort_by: 'primary_release_date.desc',
+          'primary_release_date.lte': today,
+          'vote_count.gte': 5,
+        }
+      : {
+          sort_by: 'first_air_date.desc',
+          'first_air_date.lte': today,
+          'vote_count.gte': 5,
+        };
+  }
+  return {
+    sort_by: 'popularity.desc',
+  };
+};
+
+export const getKoreanDramas = async (page = 1, filter = 'popular') => {
   try {
+    const sortParams = getSortParams(filter, false);
     const response = await tmdbClient.get(`/discover/tv`, {
       params: {
         page,
         with_original_language: 'ko',
-        sort_by: 'popularity.desc',
+        ...sortParams,
         include_adult: false,
       },
     });
@@ -133,14 +160,15 @@ export const searchMulti = async (query: string, page = 1) => {
   }
 };
 
-export const getAnime = async (page = 1) => {
+export const getAnime = async (page = 1, filter = 'popular') => {
   try {
+    const sortParams = getSortParams(filter, false);
     const response = await tmdbClient.get(`/discover/tv`, {
       params: {
         page,
         with_genres: '16', // Animation
         with_original_language: 'ja',
-        sort_by: 'popularity.desc',
+        ...sortParams,
         include_adult: false,
       },
     });
@@ -150,14 +178,15 @@ export const getAnime = async (page = 1) => {
   }
 };
 
-export const getAnimeMovies = async (page = 1) => {
+export const getAnimeMovies = async (page = 1, filter = 'popular') => {
   try {
+    const sortParams = getSortParams(filter, true);
     const response = await tmdbClient.get(`/discover/movie`, {
       params: {
         page,
         with_genres: '16', // Animation
         with_original_language: 'ja',
-        sort_by: 'popularity.desc',
+        ...sortParams,
         include_adult: false,
       },
     });
@@ -166,5 +195,3 @@ export const getAnimeMovies = async (page = 1) => {
     throw error;
   }
 };
-
-
