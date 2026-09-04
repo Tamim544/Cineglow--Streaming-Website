@@ -57,27 +57,44 @@ export default async function AnimePage({
           </div>
 
           {/* Series vs Movies Filter Tabs */}
-          <div style={{ display: "flex", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "4px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              gap: "4px",
+              background: "rgba(255, 255, 255, 0.05)",
+              padding: "4px",
+              borderRadius: "9999px",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+            }}
+          >
             <Link
               href={buildPageUrl(1, "series", filterParam)}
-              className={`btn ${!isMovies ? "btn-primary" : "btn-secondary"}`}
               style={{
-                padding: "0.5rem 1.25rem",
-                fontSize: "0.9rem",
-                border: "none",
+                padding: "0.5rem 1.15rem",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                borderRadius: "9999px",
+                textDecoration: "none",
+                transition: "all 0.2s ease",
                 background: !isMovies ? "linear-gradient(135deg, #f87171, #fb923c)" : "transparent",
+                color: "#fff",
+                boxShadow: !isMovies ? "0 4px 15px rgba(248, 113, 113, 0.35)" : "none",
               }}
             >
               Anime Series
             </Link>
             <Link
               href={buildPageUrl(1, "movies", filterParam)}
-              className={`btn ${isMovies ? "btn-primary" : "btn-secondary"}`}
               style={{
-                padding: "0.5rem 1.25rem",
-                fontSize: "0.9rem",
-                border: "none",
+                padding: "0.5rem 1.15rem",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                borderRadius: "9999px",
+                textDecoration: "none",
+                transition: "all 0.2s ease",
                 background: isMovies ? "linear-gradient(135deg, #f87171, #fb923c)" : "transparent",
+                color: "#fff",
+                boxShadow: isMovies ? "0 4px 15px rgba(248, 113, 113, 0.35)" : "none",
               }}
             >
               Anime Movies
@@ -86,20 +103,45 @@ export default async function AnimePage({
         </div>
 
         {/* Sort Filter Pills */}
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "2.5rem", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.6rem",
+            marginBottom: "2.5rem",
+            overflowX: "auto",
+            paddingBottom: "4px",
+            scrollbarWidth: "none",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
           {filters.map((f) => {
             const active = filterParam === f.id;
             return (
               <Link
                 key={f.id}
                 href={buildPageUrl(1, typeParam, f.id)}
-                className={`btn ${active ? "btn-primary" : "btn-secondary"}`}
                 style={{
-                  padding: "0.45rem 1rem",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "0.55rem 1.15rem",
                   fontSize: "0.85rem",
-                  border: active ? "none" : "1px solid rgba(255,255,255,0.1)",
-                  background: active ? "linear-gradient(135deg, #f87171, #fb923c)" : "rgba(255,255,255,0.05)",
-                  color: "#fff",
+                  fontWeight: 600,
+                  borderRadius: "9999px",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                  background: active
+                    ? "linear-gradient(135deg, #f87171, #fb923c)"
+                    : "rgba(255, 255, 255, 0.06)",
+                  border: active
+                    ? "1px solid rgba(248, 113, 113, 0.5)"
+                    : "1px solid rgba(255, 255, 255, 0.1)",
+                  color: active ? "#fff" : "rgba(255, 255, 255, 0.8)",
+                  boxShadow: active
+                    ? "0 4px 15px rgba(248, 113, 113, 0.35)"
+                    : "none",
                 }}
               >
                 {f.label}

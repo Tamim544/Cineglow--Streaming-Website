@@ -52,20 +52,44 @@ export default async function KDramasPage({
           </div>
 
           {/* Filter Pills */}
-          <div style={{ display: "flex", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "4px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,255,255,0.1)", flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.6rem",
+              overflowX: "auto",
+              paddingBottom: "4px",
+              scrollbarWidth: "none",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
             {filters.map((f) => {
               const active = filterParam === f.id;
               return (
                 <Link
                   key={f.id}
                   href={buildPageUrl(1, f.id)}
-                  className={`btn ${active ? "btn-primary" : "btn-secondary"}`}
                   style={{
-                    padding: "0.45rem 1rem",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "0.55rem 1.15rem",
                     fontSize: "0.85rem",
-                    border: "none",
-                    background: active ? "linear-gradient(135deg, #ec4899, #8b5cf6)" : "transparent",
-                    color: "#fff",
+                    fontWeight: 600,
+                    borderRadius: "9999px",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                    background: active
+                      ? "linear-gradient(135deg, #ec4899, #8b5cf6)"
+                      : "rgba(255, 255, 255, 0.06)",
+                    border: active
+                      ? "1px solid rgba(236, 72, 153, 0.5)"
+                      : "1px solid rgba(255, 255, 255, 0.1)",
+                    color: active ? "#fff" : "rgba(255, 255, 255, 0.8)",
+                    boxShadow: active
+                      ? "0 4px 15px rgba(236, 72, 153, 0.35)"
+                      : "none",
                   }}
                 >
                   {f.label}
