@@ -1,5 +1,5 @@
 import MovieCard from "@/components/MovieCard";
-import { getPopularMovies, searchMovies } from "@/lib/tmdb";
+import { getPopularMovies, searchMulti } from "@/lib/tmdb";
 import Link from "next/link";
 
 export default async function BrowsePage({
@@ -17,17 +17,21 @@ export default async function BrowsePage({
   let totalPages = 1;
 
   try {
-    const data = queryParam 
-      ? await searchMovies(queryParam, currentPage)
-      : await getPopularMovies(currentPage);
-      
-    movies = data.results || [];
-    totalPages = data.total_pages || 1;
-    // Cap total pages to 500 as TMDB API restricts to 500 pages max
-    totalPages = Math.min(totalPages, 500);
+    if (queryParam) {
+      const data = await searchMulti(queryParam, currentPage);
+      movies = (data.results || []).filter(
+        (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+      );
+      totalPages = Math.min(data.total_pages || 1, 500);
+    } else {
+      const data = await getPopularMovies(currentPage);
+      movies = data.results || [];
+      totalPages = Math.min(data.total_pages || 1, 500);
+    }
   } catch (error) {
     console.warn("Using empty array because TMDB fetch failed");
   }
+
 
   const hasNextPage = currentPage < totalPages;
   const hasPrevPage = currentPage > 1;
@@ -59,7 +63,7 @@ export default async function BrowsePage({
               type="text" 
               name="q" 
               defaultValue={queryParam}
-              placeholder="Search movies..." 
+              placeholder="Search movies, K-Dramas..." 
               className="input-base"
               style={{ width: "250px" }}
             />
@@ -73,16 +77,22 @@ export default async function BrowsePage({
             gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
             gap: "2rem" 
           }}>
-            {movies.map((movie: any) => (
-              <MovieCard 
-                key={movie.id}
-                id={movie.id}
-                title={movie.title || movie.name}
-                posterPath={movie.poster_path}
-                rating={movie.vote_average || 0}
-                year={movie.release_date ? movie.release_date.split('-')[0] : (movie.first_air_date ? movie.first_air_date.split('-')[0] : "N/A")}
-              />
-            ))}
+            {movies.map((movie: any) => {
+              const isTV = movie.media_type === "tv";
+              const isKorean = movie.original_language === "ko";
+              return (
+                <MovieCard 
+                  key={movie.id}
+                  id={movie.id}
+                  title={movie.title || movie.name}
+                  posterPath={movie.poster_path}
+                  rating={movie.vote_average || 0}
+                  year={movie.release_date ? movie.release_date.split('-')[0] : (movie.first_air_date ? movie.first_air_date.split('-')[0] : "N/A")}
+                  mediaType={isTV ? "tv" : "movie"}
+                  badge={isTV ? (isKorean ? "K-DRAMA" : "SERIES") : undefined}
+                />
+              );
+            })}
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "4rem 0", color: "var(--text-secondary)" }}>

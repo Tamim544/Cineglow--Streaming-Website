@@ -1,6 +1,7 @@
 import HeroCarousel from "@/components/HeroCarousel";
 import MovieCard from "@/components/MovieCard";
-import { getTrendingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies } from "@/lib/tmdb";
+import Link from "next/link";
+import { getTrendingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, getKoreanDramas } from "@/lib/tmdb";
 
 // Fallback mock data if API key is not yet provided
 const MOCK_MOVIES = [
@@ -19,25 +20,29 @@ export default async function Home() {
   let popularMovies = [];
   let topRatedMovies = [];
   let upcomingMovies = [];
+  let koreanDramas = [];
 
   try {
-    const [trendingData, popularData, topRatedData, upcomingData] = await Promise.all([
+    const [trendingData, popularData, topRatedData, upcomingData, kdramaData] = await Promise.all([
       getTrendingMovies(1),
       getPopularMovies(1),
       getTopRatedMovies(1),
-      getUpcomingMovies(1)
+      getUpcomingMovies(1),
+      getKoreanDramas(1),
     ]);
     
     trendingMovies = trendingData.results;
     popularMovies = popularData.results;
     topRatedMovies = topRatedData.results;
     upcomingMovies = upcomingData.results;
+    koreanDramas = kdramaData.results;
   } catch (error) {
     console.warn("Using mock data because TMDB fetch failed (API key missing?)");
     trendingMovies = MOCK_MOVIES;
     popularMovies = MOCK_MOVIES;
     topRatedMovies = MOCK_MOVIES;
     upcomingMovies = MOCK_MOVIES;
+    koreanDramas = [];
   }
 
   return (
@@ -48,7 +53,7 @@ export default async function Home() {
       <div className="container" style={{ marginTop: "4rem", marginBottom: "4rem" }} id="trending">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
           <h2 className="heading-md">Trending Now</h2>
-          <button className="btn btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.9rem" }}>View All</button>
+          <Link href="/trending" className="btn btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.9rem" }}>View All</Link>
         </div>
         
         <div style={{ 
@@ -68,6 +73,45 @@ export default async function Home() {
           ))}
         </div>
       </div>
+
+      {/* Korean Web Series & K-Dramas */}
+      {koreanDramas.length > 0 && (
+        <div className="container" style={{ marginBottom: "4rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+            <div>
+              <div style={{ display: "inline-block", padding: "2px 8px", borderRadius: "var(--radius-sm)", background: "rgba(236, 72, 153, 0.15)", border: "1px solid rgba(236, 72, 153, 0.3)", color: "#f472b6", fontSize: "0.75rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase" }}>
+                Hot Right Now
+              </div>
+              <h2 className="heading-md">
+                Popular <span style={{ background: "linear-gradient(135deg, #ec4899, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Korean Web Series</span>
+              </h2>
+            </div>
+            <Link href="/kdramas" className="btn btn-secondary" style={{ padding: "0.5rem 1rem", fontSize: "0.9rem" }}>
+              Explore All K-Dramas →
+            </Link>
+          </div>
+          
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+            gap: "2rem" 
+          }}>
+            {koreanDramas.slice(0, 10).map((drama: any) => (
+              <MovieCard 
+                key={drama.id}
+                id={drama.id}
+                title={drama.name || drama.title}
+                posterPath={drama.poster_path}
+                rating={drama.vote_average || 8.0}
+                year={drama.first_air_date ? drama.first_air_date.split('-')[0] : "N/A"}
+                mediaType="tv"
+                badge="K-DRAMA"
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
 
       <div className="container" style={{ marginBottom: "4rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
