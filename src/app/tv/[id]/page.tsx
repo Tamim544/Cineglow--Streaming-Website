@@ -240,6 +240,10 @@ export default async function TVDetailPage({
           season={currentSeasonNumber}
           episode={currentEpisodeNumber}
           totalEpisodesInSeason={episodes.length || 1}
+          allSeasons={validSeasons.map((s: any) => ({
+            season_number: s.season_number,
+            episode_count: s.episode_count || 1,
+          }))}
         />
       </section>
 

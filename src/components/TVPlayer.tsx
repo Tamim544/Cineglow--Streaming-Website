@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./Player.module.css";
 
 interface TVPlayerProps {
@@ -9,6 +10,10 @@ interface TVPlayerProps {
   season: number;
   episode: number;
   totalEpisodesInSeason?: number;
+  allSeasons?: Array<{
+    season_number: number;
+    episode_count?: number;
+  }>;
   onEpisodeChange?: (season: number, episode: number) => void;
 }
 
@@ -41,10 +46,30 @@ export default function TVPlayer({
   season,
   episode,
   totalEpisodesInSeason = 1,
+  allSeasons,
   onEpisodeChange,
 }: TVPlayerProps) {
+  const router = useRouter();
   const [activeServer, setActiveServer] = useState(0);
   const [cinemaMode, setCinemaMode] = useState(false);
+
+  // Maintain local state for instant response when switching episodes
+  const [currentSeason, setCurrentSeason] = useState(season);
+  const [currentEpisode, setCurrentEpisode] = useState(episode);
+  const navigatingRef = useRef<{ season: number; episode: number } | null>(null);
+
+  // Sync props from server component when navigation completes
+  useEffect(() => {
+    if (navigatingRef.current) {
+      if (navigatingRef.current.season === season && navigatingRef.current.episode === episode) {
+        navigatingRef.current = null;
+      } else {
+        return; // Ignore stale props during active transition
+      }
+    }
+    setCurrentSeason(season);
+    setCurrentEpisode(episode);
+  }, [season, episode]);
 
   // Save to "Continue Watching" history in localStorage
   useEffect(() => {
@@ -52,8 +77,8 @@ export default function TVPlayer({
       const historyItem = {
         id: tvId,
         title,
-        season,
-        episode,
+        season: currentSeason,
+        episode: currentEpisode,
         updatedAt: Date.now(),
       };
       const stored = localStorage.getItem("cineglow_continue_watching");
@@ -64,17 +89,69 @@ export default function TVPlayer({
     } catch (e) {
       console.error("Failed to save continue watching history", e);
     }
-  }, [tvId, title, season, episode]);
+  }, [tvId, title, currentSeason, currentEpisode]);
+
+  // Determine current season index
+  const currentSeasonIndex = allSeasons?.findIndex((s) => s.season_number === currentSeason) ?? -1;
+
+  // Next episode / season logic
+  let nextSeason = currentSeason;
+  let nextEp = currentEpisode + 1;
+  let isNextSeason = false;
+
+  if (nextEp > totalEpisodesInSeason) {
+    if (allSeasons && currentSeasonIndex >= 0 && currentSeasonIndex < allSeasons.length - 1) {
+      nextSeason = allSeasons[currentSeasonIndex + 1].season_number;
+      nextEp = 1;
+      isNextSeason = true;
+    }
+  }
+
+  const hasNext =
+    currentEpisode < totalEpisodesInSeason ||
+    (allSeasons && currentSeasonIndex >= 0 && currentSeasonIndex < allSeasons.length - 1);
+
+  // Previous episode / season logic
+  let prevSeason = currentSeason;
+  let prevEp = currentEpisode - 1;
+  let isPrevSeason = false;
+
+  if (prevEp < 1) {
+    if (allSeasons && currentSeasonIndex > 0) {
+      const prevSeasonObj = allSeasons[currentSeasonIndex - 1];
+      prevSeason = prevSeasonObj.season_number;
+      prevEp = prevSeasonObj.episode_count || 1;
+      isPrevSeason = true;
+    }
+  }
+
+  const hasPrev = currentEpisode > 1 || (allSeasons && currentSeasonIndex > 0);
 
   const handlePrev = () => {
-    if (episode > 1 && onEpisodeChange) {
-      onEpisodeChange(season, episode - 1);
+    if (!hasPrev) return;
+
+    navigatingRef.current = { season: prevSeason, episode: prevEp };
+    setCurrentSeason(prevSeason);
+    setCurrentEpisode(prevEp);
+
+    // Update URL smoothly without scrolling away
+    router.push(`/tv/${tvId}?s=${prevSeason}&e=${prevEp}`, { scroll: false });
+    if (onEpisodeChange) {
+      onEpisodeChange(prevSeason, prevEp);
     }
   };
 
   const handleNext = () => {
-    if (episode < totalEpisodesInSeason && onEpisodeChange) {
-      onEpisodeChange(season, episode + 1);
+    if (!hasNext) return;
+
+    navigatingRef.current = { season: nextSeason, episode: nextEp };
+    setCurrentSeason(nextSeason);
+    setCurrentEpisode(nextEp);
+
+    // Update URL smoothly without scrolling away
+    router.push(`/tv/${tvId}?s=${nextSeason}&e=${nextEp}`, { scroll: false });
+    if (onEpisodeChange) {
+      onEpisodeChange(nextSeason, nextEp);
     }
   };
 
@@ -119,8 +196,8 @@ export default function TVPlayer({
         {/* Video Frame */}
         <div className={`${styles.videoFrame} ${cinemaMode ? styles.videoFrameTheater : ""}`}>
           <iframe
-            key={`${activeServer}-${season}-${episode}`}
-            src={servers[activeServer].url(tvId, season, episode)}
+            key={`${activeServer}-${currentSeason}-${currentEpisode}`}
+            src={servers[activeServer].url(tvId, currentSeason, currentEpisode)}
             style={{
               position: "absolute",
               top: 0,
@@ -130,7 +207,7 @@ export default function TVPlayer({
               border: 0,
             }}
             allowFullScreen
-            title={`Playing Season ${season} Episode ${episode}`}
+            title={`Playing Season ${currentSeason} Episode ${currentEpisode}`}
           />
         </div>
 
@@ -143,47 +220,92 @@ export default function TVPlayer({
             flexWrap: "wrap",
             gap: "0.75rem",
             background: "rgba(255, 255, 255, 0.05)",
-            padding: "0.75rem 1rem",
+            padding: "0.85rem 1.15rem",
             borderRadius: "var(--radius-sm)",
             backdropFilter: "blur(10px)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontWeight: 600, color: "var(--accent)" }}>
-              Season {season}, Episode {episode}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+            <span
+              style={{
+                fontWeight: 700,
+                color: "#fff",
+                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                padding: "3px 10px",
+                borderRadius: "4px",
+                fontSize: "0.82rem",
+                letterSpacing: "0.3px",
+              }}
+            >
+              PLAYING
+            </span>
+            <span style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.95rem" }}>
+              Season {currentSeason}, Episode {currentEpisode}
             </span>
             <span style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
-              (Total {totalEpisodesInSeason} episodes)
+              (Total {totalEpisodesInSeason} in Season)
             </span>
           </div>
 
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
             <button
               onClick={handlePrev}
-              disabled={episode <= 1}
+              disabled={!hasPrev}
               className="btn btn-secondary"
+              title={
+                hasPrev
+                  ? isPrevSeason
+                    ? `Go to Season ${prevSeason}, Episode ${prevEp}`
+                    : `Previous Episode (${prevEp})`
+                  : "No previous episode"
+              }
               style={{
-                padding: "0.4rem 0.8rem",
+                padding: "0.45rem 0.9rem",
                 fontSize: "0.85rem",
-                opacity: episode <= 1 ? 0.5 : 1,
-                cursor: episode <= 1 ? "not-allowed" : "pointer",
+                opacity: !hasPrev ? 0.4 : 1,
+                cursor: !hasPrev ? "not-allowed" : "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                transition: "all 0.2s ease",
               }}
             >
-              ← Previous Ep
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              <span>{isPrevSeason ? `Prev Season (S${prevSeason})` : "Previous Ep"}</span>
             </button>
+
             <button
               onClick={handleNext}
-              disabled={episode >= totalEpisodesInSeason}
+              disabled={!hasNext}
               className="btn btn-primary"
+              title={
+                hasNext
+                  ? isNextSeason
+                    ? `Go to Season ${nextSeason}, Episode 1`
+                    : `Next Episode (${nextEp})`
+                  : "No more episodes"
+              }
               style={{
-                padding: "0.4rem 0.8rem",
+                padding: "0.45rem 1rem",
                 fontSize: "0.85rem",
-                opacity: episode >= totalEpisodesInSeason ? 0.5 : 1,
-                cursor: episode >= totalEpisodesInSeason ? "not-allowed" : "pointer",
+                opacity: !hasNext ? 0.4 : 1,
+                cursor: !hasNext ? "not-allowed" : "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                background: hasNext ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : undefined,
+                borderColor: hasNext ? "#8b5cf6" : undefined,
+                boxShadow: hasNext ? "0 0 15px rgba(99, 102, 241, 0.4)" : undefined,
+                transition: "all 0.2s ease",
               }}
             >
-              Next Ep →
+              <span>{isNextSeason ? `Next Season (S${nextSeason})` : "Next Ep"}</span>
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
             </button>
           </div>
         </div>
