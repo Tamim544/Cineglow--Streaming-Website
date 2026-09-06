@@ -188,6 +188,9 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+            <Link href="/about" className={styles.link}>
+              About
+            </Link>
 
             {/* Desktop Search */}
             <div className={styles.searchContainer} ref={dropdownRef}>
@@ -554,6 +557,15 @@ export default function Navbar() {
                 ) : (
                   <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>0</span>
                 )}
+              </Link>
+
+              <Link
+                href="/about"
+                className={styles.drawerLinkItem}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>✨ About & Contact</span>
+                <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>→</span>
               </Link>
             </div>
 
