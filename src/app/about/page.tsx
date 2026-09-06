@@ -125,47 +125,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Platform Features Grid */}
-      <section className={styles.featuresSection}>
-        <h2 className={styles.sectionHeading}>Why CineGlow?</h2>
-        <p className={styles.sectionSub}>Engineered for pure cinematic enjoyment.</p>
-
-        <div className={styles.featuresGrid}>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>🎬</div>
-            <h3 className={styles.featureTitle}>Vast Entertainment Library</h3>
-            <p className={styles.featureDesc}>
-              Instant search and discovery across thousands of movies, TV shows, anime, and Korean dramas
-              continuously updated with global releases.
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>⚡</div>
-            <h3 className={styles.featureTitle}>Multi-Server Redundancy</h3>
-            <p className={styles.featureDesc}>
-              5 dynamic streaming engines (AutoEmbed, VidSrc, 2Embed) ensure uninterrupted playback with instant one-click switching.
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>🌌</div>
-            <h3 className={styles.featureTitle}>True Theater Mode</h3>
-            <p className={styles.featureDesc}>
-              Desktop edge-to-edge cinema expansion with ambient purple lighting and lights-off background dimming.
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>🔖</div>
-            <h3 className={styles.featureTitle}>Privacy-First Watchlist</h3>
-            <p className={styles.featureDesc}>
-              Save favorite movies and series directly on your browser without required logins or tracking.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Contact & Feedback Section */}
       <section id="contact" className={styles.contactSection}>
         {/* Contact Info Card */}
