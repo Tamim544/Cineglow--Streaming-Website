@@ -4,6 +4,8 @@ CineGlow is a premium, modern movie discovery web application built with **Next.
 
 ## ✨ Features
 
+- **Mobile Ultra-Wide & Fullscreen Experience**: True fullscreen with automatic landscape orientation lock on modern mobile devices (e.g. Samsung Galaxy S23 Ultra). Includes Zoom-to-Fill (~122%), 21:9 Cinemascope zoom, stretch mode, step zoom (+/- 5%), and double-tap gestures to eliminate pillarbox black bars.
+- **In-HUD TV Series Controls**: Seamless episode navigation directly inside the fullscreen HUD so you can binge-watch without exiting full screen.
 - **Cinematic Auto-Playing Carousel**: A fully custom, auto-playing hero section that cycles through the top 5 trending movies of the day, complete with a professional cross-fade animation.
 - **Immersive Dynamic Backgrounds**: The entire application dynamically adapts its background to match the currently featured movie, using a frosted-glass blur effect that makes the site feel alive.
 - **Real-Time TMDB Data**: Automatically fetches and organizes movies into beautiful, categorized rows:
