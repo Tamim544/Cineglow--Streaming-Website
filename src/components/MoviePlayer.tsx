@@ -31,29 +31,29 @@ const servers = [
   },
 ];
 
-type ZoomMode = "fit" | "fill" | "wide" | "stretch" | "custom";
+type ZoomMode = "fit" | "fill";
 
 export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
   const [activeServer, setActiveServer] = useState(0);
   const [cinemaMode, setCinemaMode] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomMode, setZoomMode] = useState<ZoomMode>("fit");
   const [zoomLevel, setZoomLevel] = useState(1.0);
-  const [showOverlay, setShowOverlay] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   const playerRef = useRef<HTMLDivElement>(null);
-  const overlayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastTapRef = useRef<number>(0);
+  const pinchStartDistRef = useRef<number>(0);
+  const pinchStartZoomRef = useRef<number>(1.0);
 
-  // Compute exact fill scale for ultra-wide mobile screens (like Samsung S23 Ultra ~19.3:9)
+  // Compute exact fill scale for ultra-wide mobile screens
   const getDeviceFillScale = useCallback(() => {
     if (typeof window === "undefined") return 1.22;
     const w = window.innerWidth;
     const h = window.innerHeight;
     const screenRatio = Math.max(w, h) / Math.min(w, h);
-    const videoRatio = 16 / 9; // ~1.7778
+    const videoRatio = 16 / 9;
     if (screenRatio > videoRatio) {
       return Math.round((screenRatio / videoRatio) * 100) / 100;
     }
@@ -65,259 +65,124 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
-    }, 2200);
+    }, 1800);
   }, []);
 
-  // Handle Zoom Mode Selection
-  const applyZoomMode = useCallback((mode: ZoomMode) => {
-    setZoomMode(mode);
-    if (mode === "fit") {
-      setZoomLevel(1.0);
-      showToast("Fit: Original 16:9");
-    } else if (mode === "fill") {
-      const fill = getDeviceFillScale();
-      setZoomLevel(fill);
-      showToast(`Fill Screen: ${Math.round(fill * 100)}%`);
-    } else if (mode === "wide") {
-      setZoomLevel(1.33);
-      showToast("Cinemascope: 133%");
-    } else if (mode === "stretch") {
-      const fill = getDeviceFillScale();
-      setZoomLevel(fill);
-      showToast("Stretched: 100% Full Width");
-    }
-  }, [getDeviceFillScale, showToast]);
-
-  // MX Player-style automatic aspect ratio cycle (Fit -> Fill -> Stretch -> 21:9 -> Fit)
-  const cycleAspectMode = useCallback(() => {
-    setZoomMode((prevMode) => {
-      let nextMode: ZoomMode = "fit";
-      let nextScale = 1.0;
-      let toast = "Aspect: Fit (16:9)";
-
-      if (prevMode === "fit") {
-        nextMode = "fill";
-        nextScale = getDeviceFillScale();
-        toast = `Aspect: Fill Screen (${Math.round(nextScale * 100)}%)`;
-      } else if (prevMode === "fill") {
-        nextMode = "stretch";
-        nextScale = getDeviceFillScale();
-        toast = "Aspect: Stretch (Full Width)";
-      } else if (prevMode === "stretch") {
-        nextMode = "wide";
-        nextScale = 1.33;
-        toast = "Aspect: 21:9 Cinemascope";
+  // Toggle between Fit and Fill
+  const toggleZoom = useCallback(() => {
+    setZoomMode((prev) => {
+      if (prev === "fit") {
+        const fill = getDeviceFillScale();
+        setZoomLevel(fill);
+        showToast(`🔍 Zoomed to fill`);
+        return "fill";
       } else {
-        nextMode = "fit";
-        nextScale = 1.0;
-        toast = "Aspect: Fit (16:9)";
+        setZoomLevel(1.0);
+        showToast(`📐 Original`);
+        return "fit";
       }
-
-      setZoomLevel(nextScale);
-      showToast(toast);
-      return nextMode;
     });
   }, [getDeviceFillScale, showToast]);
 
-  // Step Zoom in/out (+/- 5%)
-  const stepZoom = useCallback((delta: number) => {
-    setZoomLevel((prev) => {
-      const next = Math.min(1.7, Math.max(1.0, Math.round((prev + delta) * 100) / 100));
-      setZoomMode("custom");
-      showToast(`Zoom: ${Math.round(next * 100)}%`);
-      return next;
-    });
-  }, [showToast]);
-
-  // Dedicated Enter Fullscreen
-  const enterFullscreen = useCallback(async () => {
-    const el = playerRef.current;
-    if (!el) return;
-
-    try {
-      const requestFs =
-        el.requestFullscreen ||
-        (el as unknown as { webkitRequestFullscreen?: (opts?: unknown) => Promise<void> })
-          .webkitRequestFullscreen;
-
-      if (requestFs) {
-        await requestFs.call(el, { navigationUI: "hide" });
-      }
-      setIsFullscreen(true);
-      setShowOverlay(true);
-
-      const screenAny = screen as unknown as {
-        orientation?: { lock?: (orientation: string) => Promise<void>; unlock?: () => void };
-      };
-      if (screenAny.orientation?.lock) {
-        await screenAny.orientation.lock("landscape").catch(() => {});
-      }
-    } catch (err) {
-      console.warn("Fullscreen enter error:", err);
-      setIsFullscreen(true);
-    }
-  }, []);
-
-  // Dedicated Clean Exit Fullscreen - Guarantees NO loop
-  const exitFullscreen = useCallback(async () => {
-    setIsFullscreen(false);
-    setZoomMode("fit");
-    setZoomLevel(1.0);
-
-    try {
-      const doc = document as unknown as {
-        fullscreenElement?: Element;
-        webkitFullscreenElement?: Element;
-        exitFullscreen?: () => Promise<void>;
-        webkitExitFullscreen?: () => Promise<void>;
-      };
-
-      if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-        if (doc.exitFullscreen) {
-          await doc.exitFullscreen();
-        } else if (doc.webkitExitFullscreen) {
-          await doc.webkitExitFullscreen();
-        }
-      }
-    } catch (err) {
-      console.warn("Fullscreen exit error:", err);
-    }
-
-    try {
-      const screenAny = screen as unknown as {
-        orientation?: { unlock?: () => void };
-      };
-      if (screenAny.orientation?.unlock) {
-        screenAny.orientation.unlock();
-      }
-    } catch {
-      // Ignore
-    }
-  }, []);
-
-  // Toggle Fullscreen
-  const toggleFullscreen = useCallback(() => {
-    const doc = document as unknown as {
-      fullscreenElement?: Element;
-      webkitFullscreenElement?: Element;
-    };
-    const isCurrentFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
-    if (isFullscreen || isCurrentFs) {
-      exitFullscreen();
-    } else {
-      enterFullscreen();
-    }
-  }, [isFullscreen, exitFullscreen, enterFullscreen]);
-
-  // Native Fullscreen Event Listener
+  // Auto-rotation: detect landscape/portrait on mobile
   useEffect(() => {
-    const onFsChange = () => {
-      const doc = document as unknown as {
-        fullscreenElement?: Element;
-        webkitFullscreenElement?: Element;
-      };
-      const active = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
-      setIsFullscreen(active);
-      if (!active) {
-        setZoomMode("fit");
-        setZoomLevel(1.0);
-        try {
-          const screenAny = screen as unknown as {
-            orientation?: { unlock?: () => void };
-          };
-          screenAny.orientation?.unlock?.();
-        } catch {
-          // Ignore
-        }
-      }
+    if (typeof window === "undefined") return;
+
+    const checkLandscape = () => {
+      const isMobile = window.innerWidth <= 950 || window.innerHeight <= 550;
+      const landscape = window.innerWidth > window.innerHeight;
+      setIsLandscape(isMobile && landscape);
     };
 
-    document.addEventListener("fullscreenchange", onFsChange);
-    document.addEventListener("webkitfullscreenchange", onFsChange);
+    checkLandscape();
+
+    // Use matchMedia for orientation changes
+    const mql = window.matchMedia("(orientation: landscape)");
+    const handleOrientationChange = () => {
+      // Small delay to let the browser finish rotating
+      setTimeout(checkLandscape, 100);
+    };
+
+    mql.addEventListener("change", handleOrientationChange);
+    window.addEventListener("resize", handleOrientationChange);
+
+    // Also listen for screen.orientation change event
+    if (screen.orientation) {
+      screen.orientation.addEventListener("change", handleOrientationChange);
+    }
 
     return () => {
-      document.removeEventListener("fullscreenchange", onFsChange);
-      document.removeEventListener("webkitfullscreenchange", onFsChange);
+      mql.removeEventListener("change", handleOrientationChange);
+      window.removeEventListener("resize", handleOrientationChange);
+      if (screen.orientation) {
+        screen.orientation.removeEventListener("change", handleOrientationChange);
+      }
     };
   }, []);
 
-  // Fullscreen HUD Auto-Hide Timer
-  const resetOverlayTimer = useCallback(() => {
-    setShowOverlay(true);
-    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-    if (isFullscreen) {
-      overlayTimerRef.current = setTimeout(() => {
-        setShowOverlay(false);
-      }, 3500);
-    }
-  }, [isFullscreen]);
-
-  useEffect(() => {
-    if (isFullscreen) {
-      resetOverlayTimer();
-    } else {
-      setShowOverlay(true);
-    }
-    return () => {
-      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
-    };
-  }, [isFullscreen, resetOverlayTimer]);
-
-  // Double-tap on video to toggle between Fit (100%) and Fill (Ultra-wide Full Screen)
-  const handleSurfaceTap = () => {
+  // Double-tap to toggle zoom
+  const handleSurfaceTap = useCallback(() => {
     const now = Date.now();
     const diff = now - lastTapRef.current;
     lastTapRef.current = now;
 
     if (diff < 350) {
-      // Double Tap detected! Cycle aspect ratio like MX Player
-      cycleAspectMode();
-    } else {
-      // Single Tap toggles overlay visibility in fullscreen
-      if (isFullscreen) {
-        setShowOverlay((prev) => !prev);
-      }
+      toggleZoom();
     }
+  }, [toggleZoom]);
+
+  // Pinch-to-zoom gesture handlers
+  const getTouchDistance = (touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // Rotate screen orientation if supported on mobile
-  const handleRotateScreen = async () => {
-    const screenAny = screen as unknown as {
-      orientation?: {
-        type?: string;
-        lock?: (o: string) => Promise<void>;
-        unlock?: () => void;
-      };
-    };
-    if (!screenAny.orientation?.lock) {
-      showToast("Turn on Auto-Rotate in phone settings");
-      return;
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      pinchStartDistRef.current = getTouchDistance(e.touches);
+      pinchStartZoomRef.current = zoomLevel;
     }
-    try {
-      const currentType = screenAny.orientation.type || "";
-      if (currentType.includes("landscape")) {
-        await screenAny.orientation.lock("portrait");
-        showToast("Screen: Portrait");
+  }, [zoomLevel]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchStartDistRef.current > 0) {
+      const currentDist = getTouchDistance(e.touches);
+      const ratio = currentDist / pinchStartDistRef.current;
+      const fillScale = getDeviceFillScale();
+      const newZoom = Math.min(fillScale, Math.max(1.0, pinchStartZoomRef.current * ratio));
+      const rounded = Math.round(newZoom * 100) / 100;
+      setZoomLevel(rounded);
+    }
+  }, [getDeviceFillScale]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pinchStartDistRef.current > 0) {
+      pinchStartDistRef.current = 0;
+      const fillScale = getDeviceFillScale();
+      // Snap: if zoom > halfway to fill, snap to fill; otherwise snap to fit
+      const threshold = 1.0 + (fillScale - 1.0) * 0.4;
+      if (zoomLevel >= threshold) {
+        setZoomLevel(fillScale);
+        setZoomMode("fill");
+        showToast(`🔍 Zoomed to fill`);
       } else {
-        await screenAny.orientation.lock("landscape");
-        showToast("Screen: Landscape");
+        setZoomLevel(1.0);
+        setZoomMode("fit");
+        showToast(`📐 Original`);
       }
-    } catch {
-      showToast("Turn on Auto-Rotate in phone settings");
     }
-  };
+  }, [zoomLevel, getDeviceFillScale, showToast]);
 
-  // Determine CSS Transform based on zoom mode & level
+  // CSS Transform
   const computeTransform = () => {
-    if (zoomMode === "stretch") {
-      return `scaleX(${zoomLevel}) scaleY(1.0)`;
-    }
     return `scale(${zoomLevel})`;
   };
 
   return (
     <>
-      {cinemaMode && !isFullscreen && (
+      {cinemaMode && (
         <div
           className={styles.cinemaBackdrop}
           onClick={() => setCinemaMode(false)}
@@ -328,13 +193,11 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
       <div
         ref={playerRef}
         className={`${styles.playerWrapper} ${
-          cinemaMode && !isFullscreen ? styles.playerWrapperTheater : ""
-        }`}
-        onMouseMove={resetOverlayTimer}
-        onTouchStart={resetOverlayTimer}
+          cinemaMode ? styles.playerWrapperTheater : ""
+        } ${isLandscape ? styles.playerLandscape : ""}`}
       >
-        {/* Top Controls Bar - Clean single line: Servers on left, Fullscreen on right */}
-        {!isFullscreen && (
+        {/* Top Controls Bar - Server selector and Theater mode */}
+        {!isLandscape && (
           <div className={styles.controlsBar}>
             {/* Server Selection */}
             <div className={styles.serversList}>
@@ -349,9 +212,8 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
               ))}
             </div>
 
-            {/* Right Side: Theater Mode & Fullscreen */}
+            {/* Right Side: Theater Mode */}
             <div className={styles.controlsGroupRight}>
-              {/* Theater Mode Button (Desktop) */}
               <button
                 onClick={() => setCinemaMode(!cinemaMode)}
                 className={`${styles.theaterBtn} ${cinemaMode ? styles.theaterBtnActive : ""}`}
@@ -362,16 +224,20 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
                 </svg>
                 <span>{cinemaMode ? "Exit Theater" : "Theater Mode"}</span>
               </button>
-
-
             </div>
           </div>
         )}
 
         {/* Video Frame & Viewport */}
-        <div className={`${styles.videoFrame} ${cinemaMode && !isFullscreen ? styles.videoFrameTheater : ""}`}>
+        <div className={`${styles.videoFrame} ${cinemaMode && !isLandscape ? styles.videoFrameTheater : ""} ${isLandscape ? styles.videoFrameLandscape : ""}`}>
           {/* Zoom Engine Viewport */}
-          <div className={styles.iframeViewport} onClick={handleSurfaceTap}>
+          <div
+            className={styles.iframeViewport}
+            onClick={handleSurfaceTap}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className={styles.iframeTransformWrapper}
               style={{
@@ -388,136 +254,48 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
             </div>
           </div>
 
-          {!isFullscreen && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleFullscreen();
-              }}
-              className={styles.floatingFullscreenBtn}
-              title="Watch in Full Screen"
-            >
-              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-            </button>
-          )}
-
           {/* On-screen Toast Notification */}
           {toastMessage && (
             <div className={styles.zoomToast}>
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-              </svg>
               <span>{toastMessage}</span>
             </div>
           )}
 
-          {/* Fullscreen Floating HUD Overlay */}
-          {isFullscreen && (
-            <div
-              className={`${styles.fullscreenOverlay} ${
-                showOverlay ? styles.fullscreenOverlayVisible : styles.fullscreenOverlayHidden
-              }`}
-            >
-              {/* Fullscreen Top Bar */}
-              <div className={styles.fullscreenTopBar}>
-                {/* Server Selector inside Fullscreen */}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-secondary)" }}>
-                    SERVER:
-                  </span>
-                  {servers.map((server, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveServer(index)}
-                      className={`${styles.hudBtn} ${activeServer === index ? styles.hudBtnActive : ""}`}
-                    >
-                      {server.name.split(" ")[0]} {server.name.includes("(") ? server.name.match(/\((.*?)\)/)?.[1] : ""}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Top Right Controls: Aspect Shifter + Rotate + Exit */}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                  {/* Aspect Ratio Shifter Button (MX Player One-Click Toggle) */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      cycleAspectMode();
-                      resetOverlayTimer();
-                    }}
-                    className={styles.aspectShifterBtn}
-                    title="Switch Aspect Ratio: Fit -> Fill -> Stretch -> 21:9"
-                  >
-                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
-                    <span>
-                      {zoomMode === "fit" ? "Fit 16:9" : zoomMode === "fill" ? "Fill Screen" : zoomMode === "stretch" ? "Stretch" : "21:9"}
-                    </span>
-                  </button>
-
-                  {/* Rotate Screen */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleRotateScreen();
-                    }}
-                    className={styles.hudBtn}
-                    title="Rotate Screen"
-                  >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span>Rotate</span>
-                  </button>
-
-                  {/* Synchronized Exit Fullscreen Button */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      exitFullscreen();
-                    }}
-                    className={`${styles.hudBtn} ${styles.hudCloseBtn}`}
-                    title="Exit Fullscreen"
-                  >
-                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span>Exit</span>
-                  </button>
-                </div>
-              </div>
-
-
-            </div>
-          )}
-
-          {/* MX Player Style: Floating quick-toggle icon button when HUD is hidden */}
-          {isFullscreen && !showOverlay && (
+          {/* Landscape: Floating zoom toggle pill at top-center */}
+          {isLandscape && (
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                cycleAspectMode();
+                toggleZoom();
               }}
-              className={styles.floatingAspectShifter}
-              title="Tap to cycle Aspect Ratio (Fit / Fill / Stretch / 21:9)"
-              aria-label="Cycle Aspect Ratio"
+              className={styles.landscapeZoomPill}
+              title={zoomMode === "fit" ? "Zoom to fill" : "Back to original"}
             >
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
+              <span>{zoomMode === "fit" ? "Zoom to fill" : "Original"}</span>
             </button>
+          )}
+
+          {/* Landscape: Compact server switcher at bottom */}
+          {isLandscape && (
+            <div className={styles.landscapeServerBar}>
+              {servers.map((server, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveServer(index)}
+                  className={`${styles.landscapeServerBtn} ${activeServer === index ? styles.landscapeServerBtnActive : ""}`}
+                >
+                  {server.name.split(" ")[0]} {server.name.includes("(") ? server.name.match(/\((.*?)\)/)?.[1] : ""}
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
-        {!isFullscreen && (
+        {!isLandscape && (
           <p style={{ color: "var(--text-muted)", fontSize: "0.82rem", textAlign: "center" }}>
             If a server is buffering or shows an error, please try selecting a different server above.
           </p>
