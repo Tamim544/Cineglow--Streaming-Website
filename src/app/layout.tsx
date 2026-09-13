@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 
@@ -6,6 +6,13 @@ const outfit = Outfit({
   variable: "--font-primary",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0a0f",
+};
 
 export const metadata: Metadata = {
   title: "CineGlow | Premium Movie & Series Experience",
@@ -18,7 +25,6 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
 };
-
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
