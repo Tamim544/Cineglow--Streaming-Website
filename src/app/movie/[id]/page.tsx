@@ -135,7 +135,7 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
       {/* Player Section */}
       <section id="player" className="container" style={{ padding: "0 1rem 4rem", maxWidth: "1000px", margin: "0 auto" }}>
         <h2 className="heading-md" style={{ marginBottom: "1.25rem" }}>Watch Now</h2>
-        <MoviePlayer movieId={movie.id} />
+        <MoviePlayer movieId={movie.id} title={movie.title} />
       </section>
     </div>
   );
