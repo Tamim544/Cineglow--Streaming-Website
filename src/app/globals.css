@@ -218,3 +218,14 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-color);
 }
+
+/* Hide navbar and footer when phone is rotated to landscape (mobile player auto-fullscreen) */
+@media (max-width: 950px) and (orientation: landscape) and (max-height: 550px) {
+  nav,
+  footer {
+    display: none !important;
+  }
+  body {
+    overflow: hidden !important;
+  }
+}
