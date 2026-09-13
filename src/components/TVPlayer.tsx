@@ -459,17 +459,7 @@ export default function TVPlayer({
                 <span>{cinemaMode ? "Exit Theater" : "Theater Mode"}</span>
               </button>
 
-              {/* Fullscreen Button */}
-              <button
-                onClick={toggleFullscreen}
-                className={styles.fullscreenBtn}
-                title="Watch in Full Screen"
-              >
-                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                </svg>
-                <span>Full Screen</span>
-              </button>
+
             </div>
           </div>
         )}
@@ -483,8 +473,7 @@ export default function TVPlayer({
               style={{
                 transform: computeTransform(),
               }}
-            >
-              <iframe
+            ><iframe
                 key={`${activeServer}-${currentSeason}-${currentEpisode}`}
                 src={servers[activeServer].url(tvId, currentSeason, currentEpisode)}
                 className={styles.iframeElement}
@@ -494,6 +483,22 @@ export default function TVPlayer({
               />
             </div>
           </div>
+
+          {!isFullscreen && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleFullscreen();
+              }}
+              className={styles.floatingFullscreenBtn}
+              title="Watch in Full Screen"
+            >
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+            </button>
+          )}
 
           {/* On-screen Toast Notification */}
           {toastMessage && (
@@ -639,7 +644,9 @@ export default function TVPlayer({
           {/* Subtle floating button when HUD is hidden */}
           {isFullscreen && !showOverlay && (
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 setShowOverlay(true);
                 resetOverlayTimer();
               }}
