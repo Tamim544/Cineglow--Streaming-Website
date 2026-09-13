@@ -73,14 +73,14 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
     setZoomMode(mode);
     if (mode === "fit") {
       setZoomLevel(1.0);
-      showToast("Fit: Original 16:9 (Letterbox)");
+      showToast("Fit: Original 16:9");
     } else if (mode === "fill") {
       const fill = getDeviceFillScale();
       setZoomLevel(fill);
-      showToast(`Fill Screen: ${Math.round(fill * 100)}% (Ultra-Wide Fit)`);
+      showToast(`Fill Screen: ${Math.round(fill * 100)}%`);
     } else if (mode === "wide") {
       setZoomLevel(1.33);
-      showToast("Cinemascope Zoom: 133% (Crop Bars)");
+      showToast("Cinemascope: 133%");
     } else if (mode === "stretch") {
       const fill = getDeviceFillScale();
       setZoomLevel(fill);
@@ -98,10 +98,40 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
     });
   }, [showToast]);
 
-  // Fullscreen Management with Android Orientation Lock
-  const toggleFullscreen = useCallback(async () => {
+  // Dedicated Enter Fullscreen
+  const enterFullscreen = useCallback(async () => {
     const el = playerRef.current;
     if (!el) return;
+
+    try {
+      const requestFs =
+        el.requestFullscreen ||
+        (el as unknown as { webkitRequestFullscreen?: (opts?: unknown) => Promise<void> })
+          .webkitRequestFullscreen;
+
+      if (requestFs) {
+        await requestFs.call(el, { navigationUI: "hide" });
+      }
+      setIsFullscreen(true);
+      setShowOverlay(true);
+
+      const screenAny = screen as unknown as {
+        orientation?: { lock?: (orientation: string) => Promise<void>; unlock?: () => void };
+      };
+      if (screenAny.orientation?.lock) {
+        await screenAny.orientation.lock("landscape").catch(() => {});
+      }
+    } catch (err) {
+      console.warn("Fullscreen enter error:", err);
+      setIsFullscreen(true);
+    }
+  }, []);
+
+  // Dedicated Clean Exit Fullscreen - Guarantees NO loop
+  const exitFullscreen = useCallback(async () => {
+    setIsFullscreen(false);
+    setZoomMode("fit");
+    setZoomLevel(1.0);
 
     try {
       const doc = document as unknown as {
@@ -111,54 +141,44 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
         webkitExitFullscreen?: () => Promise<void>;
       };
 
-      const isCurrentFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
-
-      if (!isCurrentFs) {
-        // Enter Fullscreen
-        const requestFs = el.requestFullscreen || (el as unknown as { webkitRequestFullscreen?: (opts?: unknown) => Promise<void> }).webkitRequestFullscreen;
-        if (requestFs) {
-          await requestFs.call(el, { navigationUI: "hide" });
-        }
-        setIsFullscreen(true);
-        setShowOverlay(true);
-
-        // Attempt mobile orientation lock to landscape (e.g. on Samsung Galaxy S23 Ultra)
-        const screenAny = screen as unknown as {
-          orientation?: { lock?: (orientation: string) => Promise<void>; unlock?: () => void };
-        };
-        if (screenAny.orientation?.lock) {
-          try {
-            await screenAny.orientation.lock("landscape");
-          } catch {
-            // Non-blocking fallback if browser policy blocks orientation lock
-          }
-        }
-      } else {
-        // Exit Fullscreen
+      if (doc.fullscreenElement || doc.webkitFullscreenElement) {
         if (doc.exitFullscreen) {
           await doc.exitFullscreen();
         } else if (doc.webkitExitFullscreen) {
           await doc.webkitExitFullscreen();
         }
-        setIsFullscreen(false);
-
-        const screenAny = screen as unknown as {
-          orientation?: { unlock?: () => void };
-        };
-        if (screenAny.orientation?.unlock) {
-          try {
-            screenAny.orientation.unlock();
-          } catch {
-            // Ignore
-          }
-        }
       }
     } catch (err) {
-      console.error("Fullscreen error:", err);
+      console.warn("Fullscreen exit error:", err);
+    }
+
+    try {
+      const screenAny = screen as unknown as {
+        orientation?: { unlock?: () => void };
+      };
+      if (screenAny.orientation?.unlock) {
+        screenAny.orientation.unlock();
+      }
+    } catch {
+      // Ignore
     }
   }, []);
 
-  // Listen for native fullscreen changes (e.g. user pressed phone Back button or Esc)
+  // Toggle Fullscreen
+  const toggleFullscreen = useCallback(() => {
+    const doc = document as unknown as {
+      fullscreenElement?: Element;
+      webkitFullscreenElement?: Element;
+    };
+    const isCurrentFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
+    if (isFullscreen || isCurrentFs) {
+      exitFullscreen();
+    } else {
+      enterFullscreen();
+    }
+  }, [isFullscreen, exitFullscreen, enterFullscreen]);
+
+  // Native Fullscreen Event Listener
   useEffect(() => {
     const onFsChange = () => {
       const doc = document as unknown as {
@@ -168,7 +188,16 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
       const active = !!(doc.fullscreenElement || doc.webkitFullscreenElement);
       setIsFullscreen(active);
       if (!active) {
-        setShowOverlay(true);
+        setZoomMode("fit");
+        setZoomLevel(1.0);
+        try {
+          const screenAny = screen as unknown as {
+            orientation?: { unlock?: () => void };
+          };
+          screenAny.orientation?.unlock?.();
+        } catch {
+          // Ignore
+        }
       }
     };
 
@@ -272,12 +301,12 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
       <div
         ref={playerRef}
         className={`${styles.playerWrapper} ${
-          isFullscreen ? styles.playerWrapperFullscreen : cinemaMode ? styles.playerWrapperTheater : ""
+          cinemaMode && !isFullscreen ? styles.playerWrapperTheater : ""
         }`}
         onMouseMove={resetOverlayTimer}
         onTouchStart={resetOverlayTimer}
       >
-        {/* Top Controls Bar (Inline view) */}
+        {/* Top Controls Bar - Clean single line: Servers on left, Fullscreen on right */}
         {!isFullscreen && (
           <div className={styles.controlsBar}>
             {/* Server Selection */}
@@ -293,59 +322,8 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
               ))}
             </div>
 
-            {/* Right Side: Zoom / Fit Controls + Fullscreen Button */}
+            {/* Right Side: Theater Mode & Fullscreen */}
             <div className={styles.controlsGroupRight}>
-              {/* Zoom Mode Switcher Pills */}
-              <div className={styles.zoomButtonGroup}>
-                <button
-                  onClick={() => applyZoomMode("fit")}
-                  className={`${styles.zoomModeBtn} ${zoomMode === "fit" ? styles.zoomModeBtnActive : ""}`}
-                  title="Original 16:9 Aspect Ratio with Letterbox"
-                >
-                  Fit 16:9
-                </button>
-                <button
-                  onClick={() => applyZoomMode("fill")}
-                  className={`${styles.zoomModeBtn} ${zoomMode === "fill" ? styles.zoomModeBtnActive : ""}`}
-                  title="Fill Full Screen (Samsung S23 Ultra 19.5:9 Edge-to-Edge)"
-                >
-                  Fill Screen
-                </button>
-                <button
-                  onClick={() => applyZoomMode("wide")}
-                  className={`${styles.zoomModeBtn} ${zoomMode === "wide" ? styles.zoomModeBtnActive : ""}`}
-                  title="21:9 Cinemascope Zoom (Crops black bars)"
-                >
-                  21:9
-                </button>
-                <button
-                  onClick={() => applyZoomMode("stretch")}
-                  className={`${styles.zoomModeBtn} ${zoomMode === "stretch" ? styles.zoomModeBtnActive : ""}`}
-                  title="Stretch to fill width without cropping"
-                >
-                  Stretch
-                </button>
-
-                {/* Fine Zoom Stepper */}
-                <button
-                  onClick={() => stepZoom(-0.05)}
-                  disabled={zoomLevel <= 1.0}
-                  className={styles.zoomStepBtn}
-                  title="Zoom Out (-5%)"
-                >
-                  -
-                </button>
-                <span className={styles.zoomLabel}>{Math.round(zoomLevel * 100)}%</span>
-                <button
-                  onClick={() => stepZoom(0.05)}
-                  disabled={zoomLevel >= 1.7}
-                  className={styles.zoomStepBtn}
-                  title="Zoom In (+5%)"
-                >
-                  +
-                </button>
-              </div>
-
               {/* Theater Mode Button (Desktop) */}
               <button
                 onClick={() => setCinemaMode(!cinemaMode)}
@@ -362,7 +340,7 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
               <button
                 onClick={toggleFullscreen}
                 className={styles.fullscreenBtn}
-                title="Enter True Fullscreen Mode with Landscape Lock"
+                title="Watch in Full Screen"
               >
                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -435,7 +413,7 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
                   <button
                     onClick={handleRotateScreen}
                     className={styles.hudBtn}
-                    title="Rotate Screen Orientation (Landscape/Portrait)"
+                    title="Rotate Screen"
                   >
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -443,13 +421,13 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
                     <span>Rotate</span>
                   </button>
 
-                  {/* Exit Fullscreen */}
+                  {/* Explicit Exit Fullscreen Button - One Tap Guaranteed Exit */}
                   <button
-                    onClick={toggleFullscreen}
+                    onClick={exitFullscreen}
                     className={`${styles.hudBtn} ${styles.hudCloseBtn}`}
                     title="Exit Fullscreen"
                   >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     <span>Exit</span>
@@ -461,7 +439,7 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
               <div className={styles.fullscreenBottomBar}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-secondary)" }}>
-                    ASPECT / ZOOM:
+                    ZOOM:
                   </span>
                   <div className={styles.zoomButtonGroup}>
                     <button
@@ -473,7 +451,7 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
                     <button
                       onClick={() => applyZoomMode("fill")}
                       className={`${styles.zoomModeBtn} ${zoomMode === "fill" ? styles.zoomModeBtnActive : ""}`}
-                      title="Fill Screen (Samsung S23 Ultra Edge-to-Edge)"
+                      title="Fill Full Screen (Samsung S23 Ultra Edge-to-Edge)"
                     >
                       Fill Screen
                     </button>
@@ -515,7 +493,7 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
             </div>
           )}
 
-          {/* Subtle floating button to bring back controls or quick-toggle fill when HUD is hidden */}
+          {/* Subtle floating button when HUD is hidden */}
           {isFullscreen && !showOverlay && (
             <button
               onClick={() => {
@@ -534,14 +512,9 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
         </div>
 
         {!isFullscreen && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", color: "var(--text-muted)", fontSize: "0.8rem" }}>
-            <p>
-              If a server is buffering or shows an error, please try selecting a different server above.
-            </p>
-            <p style={{ color: "var(--text-secondary)" }}>
-              Tip: Click <strong>Full Screen</strong> or <strong>Fill Screen</strong> to fit whole screen on Samsung S23 Ultra.
-            </p>
-          </div>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.82rem", textAlign: "center" }}>
+            If a server is buffering or shows an error, please try selecting a different server above.
+          </p>
         )}
       </div>
     </>
