@@ -145,6 +145,37 @@ export default function TVPlayer({
     }
   }, [getDeviceFillScale, showToast]);
 
+  // MX Player-style automatic aspect ratio cycle (Fit -> Fill -> Stretch -> 21:9 -> Fit)
+  const cycleAspectMode = useCallback(() => {
+    setZoomMode((prevMode) => {
+      let nextMode: ZoomMode = "fit";
+      let nextScale = 1.0;
+      let toast = "Aspect: Fit (16:9)";
+
+      if (prevMode === "fit") {
+        nextMode = "fill";
+        nextScale = getDeviceFillScale();
+        toast = `Aspect: Fill Screen (${Math.round(nextScale * 100)}%)`;
+      } else if (prevMode === "fill") {
+        nextMode = "stretch";
+        nextScale = getDeviceFillScale();
+        toast = "Aspect: Stretch (Full Width)";
+      } else if (prevMode === "stretch") {
+        nextMode = "wide";
+        nextScale = 1.33;
+        toast = "Aspect: 21:9 Cinemascope";
+      } else {
+        nextMode = "fit";
+        nextScale = 1.0;
+        toast = "Aspect: Fit (16:9)";
+      }
+
+      setZoomLevel(nextScale);
+      showToast(toast);
+      return nextMode;
+    });
+  }, [getDeviceFillScale, showToast]);
+
   // Step Zoom in/out (+/- 5%)
   const stepZoom = useCallback((delta: number) => {
     setZoomLevel((prev) => {
@@ -296,12 +327,8 @@ export default function TVPlayer({
     lastTapRef.current = now;
 
     if (diff < 350) {
-      // Double Tap detected!
-      if (zoomMode === "fit" && zoomLevel === 1.0) {
-        applyZoomMode("fill");
-      } else {
-        applyZoomMode("fit");
-      }
+      // Double Tap detected! Cycle aspect ratio like MX Player
+      cycleAspectMode();
     } else {
       // Single Tap toggles overlay visibility in fullscreen
       if (isFullscreen) {
@@ -535,11 +562,34 @@ export default function TVPlayer({
                   ))}
                 </div>
 
-                {/* Top Right Controls */}
+                {/* Top Right Controls: Aspect Shifter + Rotate + Exit */}
                 <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  {/* Aspect Ratio Shifter Button (MX Player One-Click Toggle) */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      cycleAspectMode();
+                      resetOverlayTimer();
+                    }}
+                    className={styles.aspectShifterBtn}
+                    title="Switch Aspect Ratio: Fit -> Fill -> Stretch -> 21:9"
+                  >
+                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                    <span>
+                      {zoomMode === "fit" ? "Fit 16:9" : zoomMode === "fill" ? "Fill Screen" : zoomMode === "stretch" ? "Stretch" : "21:9"}
+                    </span>
+                  </button>
+
                   {/* Rotate Screen */}
                   <button
-                    onClick={handleRotateScreen}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRotateScreen();
+                    }}
                     className={styles.hudBtn}
                     title="Rotate Screen"
                   >
@@ -549,9 +599,13 @@ export default function TVPlayer({
                     <span>Rotate</span>
                   </button>
 
-                  {/* Explicit Exit Fullscreen Button - One Tap Guaranteed Exit */}
+                  {/* Synchronized Exit Fullscreen Button */}
                   <button
-                    onClick={exitFullscreen}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      exitFullscreen();
+                    }}
                     className={`${styles.hudBtn} ${styles.hudCloseBtn}`}
                     title="Exit Fullscreen"
                   >
@@ -588,75 +642,26 @@ export default function TVPlayer({
                   </button>
                 </div>
 
-                {/* Aspect / Zoom Pill Group */}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-secondary)" }}>
-                    ZOOM:
-                  </span>
-                  <div className={styles.zoomButtonGroup}>
-                    <button
-                      onClick={() => applyZoomMode("fit")}
-                      className={`${styles.zoomModeBtn} ${zoomMode === "fit" ? styles.zoomModeBtnActive : ""}`}
-                    >
-                      Fit 16:9
-                    </button>
-                    <button
-                      onClick={() => applyZoomMode("fill")}
-                      className={`${styles.zoomModeBtn} ${zoomMode === "fill" ? styles.zoomModeBtnActive : ""}`}
-                      title="Fill Full Screen (Samsung S23 Ultra Edge-to-Edge)"
-                    >
-                      Fill Screen
-                    </button>
-                    <button
-                      onClick={() => applyZoomMode("wide")}
-                      className={`${styles.zoomModeBtn} ${zoomMode === "wide" ? styles.zoomModeBtnActive : ""}`}
-                    >
-                      21:9
-                    </button>
-                    <button
-                      onClick={() => applyZoomMode("stretch")}
-                      className={`${styles.zoomModeBtn} ${zoomMode === "stretch" ? styles.zoomModeBtnActive : ""}`}
-                    >
-                      Stretch
-                    </button>
 
-                    <button
-                      onClick={() => stepZoom(-0.05)}
-                      disabled={zoomLevel <= 1.0}
-                      className={styles.zoomStepBtn}
-                    >
-                      -
-                    </button>
-                    <span className={styles.zoomLabel}>{Math.round(zoomLevel * 100)}%</span>
-                    <button
-                      onClick={() => stepZoom(0.05)}
-                      disabled={zoomLevel >= 1.7}
-                      className={styles.zoomStepBtn}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           )}
 
-          {/* Subtle floating button when HUD is hidden */}
+          {/* MX Player Style: Floating quick-toggle icon button when HUD is hidden */}
           {isFullscreen && !showOverlay && (
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setShowOverlay(true);
-                resetOverlayTimer();
+                cycleAspectMode();
               }}
-              className={styles.floatingZoomHintBtn}
-              title="Tap to show controls"
+              className={styles.floatingAspectShifter}
+              title="Tap to cycle Aspect Ratio (Fit / Fill / Stretch / 21:9)"
+              aria-label="Cycle Aspect Ratio"
             >
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
-              <span>{Math.round(zoomLevel * 100)}% • Controls</span>
             </button>
           )}
         </div>
