@@ -19,23 +19,55 @@ interface TVPlayerProps {
 
 const servers = [
   {
-    name: "Server 1 (AutoEmbed)",
+    name: "Server 1 (Smashy)",
+    url: (id: number, s: number, e: number) => `https://player.smashy.stream/tv/${id}?s=${s}&e=${e}`,
+  },
+  {
+    name: "Server 2 (AutoEmbed)",
     url: (id: number, s: number, e: number) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
   },
   {
-    name: "Server 2 (VidSrc.pm)",
+    name: "Server 3 (Flimxy)",
+    url: (id: number, s: number, e: number) => `https://flimxy.com/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 4 (VidSrc.pm)",
     url: (id: number, s: number, e: number) => `https://vidsrc.pm/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
-    name: "Server 3 (2Embed)",
+    name: "Server 5 (Embed.su)",
+    url: (id: number, s: number, e: number) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 6 (VidSrc.pro)",
+    url: (id: number, s: number, e: number) => `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 7 (VidSrc.in)",
+    url: (id: number, s: number, e: number) => `https://vidsrc.in/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 8 (Multiembed)",
+    url: (id: number, s: number, e: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+  },
+  {
+    name: "Server 9 (VidSrc.cc)",
+    url: (id: number, s: number, e: number) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 10 (2Embed)",
     url: (id: number, s: number, e: number) => `https://2embed.skin/embedtv/${id}&s=${s}&e=${e}`,
   },
   {
-    name: "Server 4 (VidSrc.me)",
+    name: "Server 11 (BlackVid)",
+    url: (id: number, s: number, e: number) => `https://blackvid.space/embed?tmdb=${id}&season=${s}&episode=${e}`,
+  },
+  {
+    name: "Server 12 (VidSrc.me)",
     url: (id: number, s: number, e: number) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
-    name: "Server 5 (VidSrc.to)",
+    name: "Server 13 (VidSrc.to)",
     url: (id: number, s: number, e: number) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
   },
 ];
