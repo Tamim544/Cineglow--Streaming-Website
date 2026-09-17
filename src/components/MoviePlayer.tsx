@@ -10,23 +10,55 @@ interface MoviePlayerProps {
 
 const servers = [
   {
-    name: "Server 1 (AutoEmbed)",
+    name: "Server 1 (Smashy)",
+    url: (id: number) => `https://player.smashy.stream/movie/${id}`,
+  },
+  {
+    name: "Server 2 (AutoEmbed)",
     url: (id: number) => `https://autoembed.co/movie/tmdb/${id}`,
   },
   {
-    name: "Server 2 (VidSrc.pm)",
+    name: "Server 3 (Flimxy)",
+    url: (id: number) => `https://flimxy.com/embed/movie/${id}`,
+  },
+  {
+    name: "Server 4 (VidSrc.pm)",
     url: (id: number) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 3 (2Embed)",
+    name: "Server 5 (Embed.su)",
+    url: (id: number) => `https://embed.su/embed/movie/${id}`,
+  },
+  {
+    name: "Server 6 (VidSrc.pro)",
+    url: (id: number) => `https://vidsrc.pro/embed/movie/${id}`,
+  },
+  {
+    name: "Server 7 (VidSrc.in)",
+    url: (id: number) => `https://vidsrc.in/embed/movie/${id}`,
+  },
+  {
+    name: "Server 8 (Multiembed)",
+    url: (id: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+  },
+  {
+    name: "Server 9 (VidSrc.cc)",
+    url: (id: number) => `https://vidsrc.cc/v2/embed/movie/${id}`,
+  },
+  {
+    name: "Server 10 (2Embed)",
     url: (id: number) => `https://2embed.skin/embed/${id}`,
   },
   {
-    name: "Server 4 (VidSrc.me)",
+    name: "Server 11 (BlackVid)",
+    url: (id: number) => `https://blackvid.space/embed?tmdb=${id}`,
+  },
+  {
+    name: "Server 12 (VidSrc.me)",
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 5 (VidSrc.to)",
+    name: "Server 13 (VidSrc.to)",
     url: (id: number) => `https://vidsrc.to/embed/movie/${id}`,
   },
 ];
