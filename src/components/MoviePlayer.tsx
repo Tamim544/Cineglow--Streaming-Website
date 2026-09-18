@@ -29,6 +29,14 @@ const servers = [
     name: "Server 5 (VidSrc.me)",
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
   },
+  {
+    name: "Server 6 (Frembed)",
+    url: (id: number) => `https://frembed.live/api/film.php?id=${id}`,
+  },
+  {
+    name: "Server 7 (Videasy)",
+    url: (id: number) => `https://player.videasy.net/movie/${id}`,
+  },
 ];
 
 type ZoomMode = "fit" | "fill";
