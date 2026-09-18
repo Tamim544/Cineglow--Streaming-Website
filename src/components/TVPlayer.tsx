@@ -27,32 +27,12 @@ const servers = [
     url: (id: number, s: number, e: number) => `https://vidsrc.pm/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
-    name: "Server 7 (VidSrc.in)",
-    url: (id: number, s: number, e: number) => `https://vidsrc.in/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    name: "Server 8 (Multiembed)",
-    url: (id: number, s: number, e: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
-  },
-  {
-    name: "Server 9 (VidSrc.cc)",
-    url: (id: number, s: number, e: number) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-  },
-  {
     name: "Server 10 (2Embed)",
     url: (id: number, s: number, e: number) => `https://2embed.skin/embedtv/${id}&s=${s}&e=${e}`,
   },
   {
-    name: "Server 11 (BlackVid)",
-    url: (id: number, s: number, e: number) => `https://blackvid.space/embed?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
     name: "Server 12 (VidSrc.me)",
     url: (id: number, s: number, e: number) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    name: "Server 13 (VidSrc.to)",
-    url: (id: number, s: number, e: number) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
   },
 ];
 
