@@ -18,14 +18,6 @@ const servers = [
     url: (id: number) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 7 (VidSrc.in)",
-    url: (id: number) => `https://vidsrc.in/embed/movie/${id}`,
-  },
-  {
-    name: "Server 8 (Multiembed)",
-    url: (id: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-  },
-  {
     name: "Server 9 (VidSrc.cc)",
     url: (id: number) => `https://vidsrc.cc/v2/embed/movie/${id}`,
   },
