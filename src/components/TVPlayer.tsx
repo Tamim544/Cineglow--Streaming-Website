@@ -38,6 +38,18 @@ const servers = [
     name: "Server 5 (VidSrc.me)",
     url: (id: number, s: number, e: number) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
+  {
+    name: "Server 6 (Frembed)",
+    url: (id: number, s: number, e: number) => `https://frembed.live/api/serie.php?id=${id}&sa=${s}&epi=${e}`,
+  },
+  {
+    name: "Server 7 (Videasy)",
+    url: (id: number, s: number, e: number) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 8 (Vidora)",
+    url: (id: number, s: number, e: number) => `https://vidora.online/embed/tv/${id}/${s}/${e}`,
+  },
 ];
 
 type ZoomMode = "fit" | "fill";
