@@ -19,28 +19,12 @@ interface TVPlayerProps {
 
 const servers = [
   {
-    name: "Server 1 (Smashy)",
-    url: (id: number, s: number, e: number) => `https://player.smashy.stream/tv/${id}?s=${s}&e=${e}`,
-  },
-  {
     name: "Server 2 (AutoEmbed)",
     url: (id: number, s: number, e: number) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
   },
   {
-    name: "Server 3 (Flimxy)",
-    url: (id: number, s: number, e: number) => `https://flimxy.com/embed/tv/${id}/${s}/${e}`,
-  },
-  {
     name: "Server 4 (VidSrc.pm)",
     url: (id: number, s: number, e: number) => `https://vidsrc.pm/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-  },
-  {
-    name: "Server 5 (Embed.su)",
-    url: (id: number, s: number, e: number) => `https://embed.su/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    name: "Server 6 (VidSrc.pro)",
-    url: (id: number, s: number, e: number) => `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`,
   },
   {
     name: "Server 7 (VidSrc.in)",
