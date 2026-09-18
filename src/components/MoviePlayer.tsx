@@ -18,24 +18,12 @@ const servers = [
     url: (id: number) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 9 (VidSrc.cc)",
-    url: (id: number) => `https://vidsrc.cc/v2/embed/movie/${id}`,
-  },
-  {
     name: "Server 10 (2Embed)",
     url: (id: number) => `https://2embed.skin/embed/${id}`,
   },
   {
-    name: "Server 11 (BlackVid)",
-    url: (id: number) => `https://blackvid.space/embed?tmdb=${id}`,
-  },
-  {
     name: "Server 12 (VidSrc.me)",
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
-  },
-  {
-    name: "Server 13 (VidSrc.to)",
-    url: (id: number) => `https://vidsrc.to/embed/movie/${id}`,
   },
 ];
 
