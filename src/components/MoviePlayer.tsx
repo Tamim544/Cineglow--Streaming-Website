@@ -10,16 +10,8 @@ interface MoviePlayerProps {
 
 const servers = [
   {
-    name: "Server 1 (Smashy)",
-    url: (id: number) => `https://player.smashy.stream/movie/${id}`,
-  },
-  {
     name: "Server 2 (AutoEmbed)",
     url: (id: number) => `https://autoembed.co/movie/tmdb/${id}`,
-  },
-  {
-    name: "Server 3 (Flimxy)",
-    url: (id: number) => `https://flimxy.com/embed/movie/${id}`,
   },
   {
     name: "Server 4 (VidSrc.pm)",
