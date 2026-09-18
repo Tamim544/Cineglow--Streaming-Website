@@ -37,6 +37,10 @@ const servers = [
     name: "Server 7 (Videasy)",
     url: (id: number) => `https://player.videasy.net/movie/${id}`,
   },
+  {
+    name: "Server 8 (Vidora)",
+    url: (id: number) => `https://vidora.online/embed/movie/${id}`,
+  },
 ];
 
 type ZoomMode = "fit" | "fill";
