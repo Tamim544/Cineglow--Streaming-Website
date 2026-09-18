@@ -10,19 +10,19 @@ interface MoviePlayerProps {
 
 const servers = [
   {
-    name: "Server 2 (AutoEmbed)",
+    name: "Server 1 (AutoEmbed)",
     url: (id: number) => `https://autoembed.co/movie/tmdb/${id}`,
   },
   {
-    name: "Server 4 (VidSrc.pm)",
+    name: "Server 2 (VidSrc.pm)",
     url: (id: number) => `https://vidsrc.pm/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 10 (2Embed)",
+    name: "Server 3 (2Embed)",
     url: (id: number) => `https://2embed.skin/embed/${id}`,
   },
   {
-    name: "Server 12 (VidSrc.me)",
+    name: "Server 4 (VidSrc.me)",
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
   },
 ];
