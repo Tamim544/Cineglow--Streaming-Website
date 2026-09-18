@@ -22,7 +22,11 @@ const servers = [
     url: (id: number) => `https://2embed.skin/embed/${id}`,
   },
   {
-    name: "Server 4 (VidSrc.me)",
+    name: "Server 4 (VidSrc.su)",
+    url: (id: number) => `https://vidsrc.su/embed/movie/${id}`,
+  },
+  {
+    name: "Server 5 (VidSrc.me)",
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
   },
 ];
