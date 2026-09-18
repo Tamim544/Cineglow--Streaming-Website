@@ -19,19 +19,23 @@ interface TVPlayerProps {
 
 const servers = [
   {
-    name: "Server 2 (AutoEmbed)",
+    name: "Server 1 (AutoEmbed)",
     url: (id: number, s: number, e: number) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
   },
   {
-    name: "Server 4 (VidSrc.pm)",
+    name: "Server 2 (VidSrc.pm)",
     url: (id: number, s: number, e: number) => `https://vidsrc.pm/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
-    name: "Server 10 (2Embed)",
+    name: "Server 3 (2Embed)",
     url: (id: number, s: number, e: number) => `https://2embed.skin/embedtv/${id}&s=${s}&e=${e}`,
   },
   {
-    name: "Server 12 (VidSrc.me)",
+    name: "Server 4 (VidSrc.su)",
+    url: (id: number, s: number, e: number) => `https://vidsrc.su/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    name: "Server 5 (VidSrc.me)",
     url: (id: number, s: number, e: number) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
 ];
