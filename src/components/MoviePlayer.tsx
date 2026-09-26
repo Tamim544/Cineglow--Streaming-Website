@@ -30,15 +30,11 @@ const servers = [
     url: (id: number) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
   },
   {
-    name: "Server 6 (Frembed)",
-    url: (id: number) => `https://frembed.live/api/film.php?id=${id}`,
-  },
-  {
-    name: "Server 7 (Videasy)",
+    name: "Server 6 (Videasy)",
     url: (id: number) => `https://player.videasy.net/movie/${id}`,
   },
   {
-    name: "Server 8 (Vidora)",
+    name: "Server 7 (Vidora)",
     url: (id: number) => `https://vidora.online/embed/movie/${id}`,
   },
 ];
