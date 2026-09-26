@@ -70,11 +70,21 @@ export default function TVPlayer({
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   // Maintain local state for instant response when switching episodes
   const [currentSeason, setCurrentSeason] = useState(season);
   const [currentEpisode, setCurrentEpisode] = useState(episode);
   const navigatingRef = useRef<{ season: number; episode: number } | null>(null);
+
+  // Reset loading state when server, show, season, or episode changes
+  useEffect(() => {
+    setIframeLoading(true);
+    const timer = setTimeout(() => {
+      setIframeLoading(false);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [activeServer, tvId, currentSeason, currentEpisode]);
 
   const playerRef = useRef<HTMLDivElement>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -361,6 +371,25 @@ export default function TVPlayer({
 
         {/* Video Frame & Viewport */}
         <div className={`${styles.videoFrame} ${cinemaMode && !isLandscape ? styles.videoFrameTheater : ""} ${isLandscape ? styles.videoFrameLandscape : ""}`}>
+          {/* Stream Loading & Resolving Feedback Overlay */}
+          <div
+            className={`${styles.iframeLoadingOverlay} ${
+              !iframeLoading ? styles.iframeLoadingOverlayHidden : ""
+            }`}
+          >
+            <div className={styles.spinnerGlow}>
+              <div className={styles.spinnerRing} />
+              <div className={styles.spinnerPulse} />
+            </div>
+            <div className={styles.loadingServerBadge}>
+              <span className={styles.loadingDot} />
+              <span>Connecting to {servers[activeServer]?.name || "Server"}</span>
+            </div>
+            <span className={styles.loadingStatusText}>
+              Resolving secure high-speed stream...
+            </span>
+          </div>
+
           {/* Zoom Engine Viewport */}
           <div
             className={styles.iframeViewport}
@@ -374,13 +403,16 @@ export default function TVPlayer({
               style={{
                 transform: computeTransform(),
               }}
-            ><iframe
+            >
+              <iframe
                 key={`${activeServer}-${currentSeason}-${currentEpisode}`}
                 src={servers[activeServer].url(tvId, currentSeason, currentEpisode)}
                 className={styles.iframeElement}
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; screen-wake-lock"
                 title={`Playing Season ${currentSeason} Episode ${currentEpisode}`}
+                loading="eager"
+                onLoad={() => setIframeLoading(false)}
               />
             </div>
           </div>

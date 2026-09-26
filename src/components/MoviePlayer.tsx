@@ -52,6 +52,16 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
+
+  // Reset loading state when activeServer or movieId changes
+  useEffect(() => {
+    setIframeLoading(true);
+    const timer = setTimeout(() => {
+      setIframeLoading(false);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [activeServer, movieId]);
 
   const playerRef = useRef<HTMLDivElement>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -242,6 +252,25 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
 
         {/* Video Frame & Viewport */}
         <div className={`${styles.videoFrame} ${cinemaMode && !isLandscape ? styles.videoFrameTheater : ""} ${isLandscape ? styles.videoFrameLandscape : ""}`}>
+          {/* Stream Loading & Resolving Feedback Overlay */}
+          <div
+            className={`${styles.iframeLoadingOverlay} ${
+              !iframeLoading ? styles.iframeLoadingOverlayHidden : ""
+            }`}
+          >
+            <div className={styles.spinnerGlow}>
+              <div className={styles.spinnerRing} />
+              <div className={styles.spinnerPulse} />
+            </div>
+            <div className={styles.loadingServerBadge}>
+              <span className={styles.loadingDot} />
+              <span>Connecting to {servers[activeServer]?.name || "Server"}</span>
+            </div>
+            <span className={styles.loadingStatusText}>
+              Resolving secure high-speed stream...
+            </span>
+          </div>
+
           {/* Zoom Engine Viewport */}
           <div
             className={styles.iframeViewport}
@@ -255,13 +284,16 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
               style={{
                 transform: computeTransform(),
               }}
-            ><iframe
+            >
+              <iframe
                 key={`${activeServer}-${movieId}`}
                 src={servers[activeServer].url(movieId)}
                 className={styles.iframeElement}
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; screen-wake-lock"
                 title={title || "Movie Player"}
+                loading="eager"
+                onLoad={() => setIframeLoading(false)}
               />
             </div>
           </div>
