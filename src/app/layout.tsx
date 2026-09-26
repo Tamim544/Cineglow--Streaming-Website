@@ -37,6 +37,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={outfit.variable}>
       <head>
+        <link rel="preconnect" href="https://player.autoembed.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://player.autoembed.co" />
+        <link rel="preconnect" href="https://nextgencloudfabric.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://nextgencloudfabric.com" />
         <link rel="preconnect" href="https://autoembed.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://autoembed.co" />
         <link rel="preconnect" href="https://vidsrc.pm" crossOrigin="anonymous" />

@@ -20,7 +20,7 @@ interface TVPlayerProps {
 const servers = [
   {
     name: "Server 1 (AutoEmbed)",
-    url: (id: number, s: number, e: number) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
+    url: (id: number, s: number, e: number) => `https://player.autoembed.co/embed/tv/${id}/${s}/${e}`,
   },
   {
     name: "Server 2 (VidSrc.pm)",
@@ -409,7 +409,8 @@ export default function TVPlayer({
                 src={servers[activeServer].url(tvId, currentSeason, currentEpisode)}
                 className={styles.iframeElement}
                 allowFullScreen
-                allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; accelerometer *; gyroscope *"
+                allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; accelerometer *; gyroscope *; clipboard-write *; screen-wake-lock *; cross-origin-isolated *"
+                referrerPolicy="origin"
                 title={`Playing Season ${currentSeason} Episode ${currentEpisode}`}
                 loading="eager"
                 onLoad={() => setIframeLoading(false)}

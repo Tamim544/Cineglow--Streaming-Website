@@ -11,7 +11,7 @@ interface MoviePlayerProps {
 const servers = [
   {
     name: "Server 1 (AutoEmbed)",
-    url: (id: number) => `https://autoembed.co/movie/tmdb/${id}`,
+    url: (id: number) => `https://player.autoembed.co/embed/movie/${id}`,
   },
   {
     name: "Server 2 (VidSrc.pm)",
@@ -290,7 +290,8 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
                 src={servers[activeServer].url(movieId)}
                 className={styles.iframeElement}
                 allowFullScreen
-                allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; accelerometer *; gyroscope *"
+                allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; accelerometer *; gyroscope *; clipboard-write *; screen-wake-lock *; cross-origin-isolated *"
+                referrerPolicy="origin"
                 title={title || "Movie Player"}
                 loading="eager"
                 onLoad={() => setIframeLoading(false)}
