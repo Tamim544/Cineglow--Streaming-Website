@@ -409,7 +409,7 @@ export default function TVPlayer({
                 src={servers[activeServer].url(tvId, currentSeason, currentEpisode)}
                 className={styles.iframeElement}
                 allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; screen-wake-lock"
+                allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; accelerometer *; gyroscope *"
                 title={`Playing Season ${currentSeason} Episode ${currentEpisode}`}
                 loading="eager"
                 onLoad={() => setIframeLoading(false)}

@@ -290,7 +290,7 @@ export default function MoviePlayer({ movieId, title }: MoviePlayerProps) {
                 src={servers[activeServer].url(movieId)}
                 className={styles.iframeElement}
                 allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; screen-wake-lock"
+                allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; accelerometer *; gyroscope *"
                 title={title || "Movie Player"}
                 loading="eager"
                 onLoad={() => setIframeLoading(false)}
